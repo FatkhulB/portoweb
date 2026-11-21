@@ -260,7 +260,7 @@ const certItemsData = [
     tag: "data",
     tagLabel: "DATA SCIENCE",
     image: "assets/certs/dq1.jpg",
-    link: "assets/certs/dq1.pdf"
+    link: "https://academy.dqlab.id/Certificate_check/result/DQLABMBINTLC14UPEROC"
   },
   {
     id: "cert-7",
@@ -270,7 +270,7 @@ const certItemsData = [
     tag: "python",
     tagLabel: "PYTHON",
     image: "assets/certs/dq2.jpg",
-    link: "assets/certs/dq2.pdf"
+    link: "https://academy.dqlab.id/Certificate_check/result/DQLABINTP1IKJBUK"
   },
   {
     id: "cert-8",
@@ -280,7 +280,7 @@ const certItemsData = [
     tag: "sql",
     tagLabel: "SQL",
     image: "assets/certs/dq3.jpg",
-    link: "assets/certs/dq3.pdf"
+    link: "https://academy.dqlab.id/Certificate_check/result/DQLABMB14SPKTKSDU"
   },
   {
     id: "cert-9",
@@ -290,7 +290,7 @@ const certItemsData = [
     tag: "other",
     tagLabel: "EXCEL",
     image: "assets/certs/dq4.jpg",
-    link: "assets/certs/dq4.pdf"
+    link: "https://academy.dqlab.id/Certificate_check/result/DQLABMB14EXCTCKBQM"
   },
   {
     id: "cert-10",
@@ -300,7 +300,7 @@ const certItemsData = [
     tag: "data",
     tagLabel: "MACHINE LEARNING",
     image: "assets/certs/dq5.jpg",
-    link: "assets/certs/dq5.pdf"
+    link: "https://academy.dqlab.id/Certificate_check/result/DQLABMB14MAIUMRHGL"
   }
 ];
 
