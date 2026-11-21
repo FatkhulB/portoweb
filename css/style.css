@@ -320,6 +320,7 @@ body.project-screen-active .side-number {
 
 /* Classic Video Game Title Screen Pulsing Animation */
 @keyframes p3rGameTitlePulse {
+
   0%,
   100% {
     opacity: 1;
@@ -335,6 +336,7 @@ body.project-screen-active .side-number {
 }
 
 @keyframes p3rGameStartFlash {
+
   0%,
   100% {
     filter: brightness(2.2);
@@ -359,6 +361,7 @@ body.project-screen-active .side-number {
 }
 
 @keyframes p3rGameSubPulse {
+
   0%,
   100% {
     opacity: 0.85;
@@ -1403,23 +1406,63 @@ body.project-screen-active .side-number {
    Persona 3 Reload Dynamic Screen Shake & Vibration FX
    ========================================================================== */
 @keyframes p3rSelectMicroShake {
-  0% { transform: translate3d(0, 0, 0); }
-  20% { transform: translate3d(-2px, 1.5px, 0) rotate(-0.12deg); }
-  40% { transform: translate3d(2.5px, -1.5px, 0) rotate(0.12deg); }
-  60% { transform: translate3d(-1.5px, -1px, 0); }
-  80% { transform: translate3d(1px, 0.5px, 0); }
-  100% { transform: translate3d(0, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  20% {
+    transform: translate3d(-2px, 1.5px, 0) rotate(-0.12deg);
+  }
+
+  40% {
+    transform: translate3d(2.5px, -1.5px, 0) rotate(0.12deg);
+  }
+
+  60% {
+    transform: translate3d(-1.5px, -1px, 0);
+  }
+
+  80% {
+    transform: translate3d(1px, 0.5px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes p3rConfirmImpactShake {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  15% { transform: translate3d(-4px, 3px, 0) rotate(-0.3deg) scale(1.006); }
-  30% { transform: translate3d(5px, -3.5px, 0) rotate(0.25deg) scale(1.004); }
-  45% { transform: translate3d(-3.5px, 2px, 0) rotate(-0.15deg); }
-  60% { transform: translate3d(2.5px, -1.5px, 0) rotate(0.1deg); }
-  75% { transform: translate3d(-1px, 1px, 0); }
-  90% { transform: translate3d(0.8px, -0.5px, 0); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  15% {
+    transform: translate3d(-4px, 3px, 0) rotate(-0.3deg) scale(1.006);
+  }
+
+  30% {
+    transform: translate3d(5px, -3.5px, 0) rotate(0.25deg) scale(1.004);
+  }
+
+  45% {
+    transform: translate3d(-3.5px, 2px, 0) rotate(-0.15deg);
+  }
+
+  60% {
+    transform: translate3d(2.5px, -1.5px, 0) rotate(0.1deg);
+  }
+
+  75% {
+    transform: translate3d(-1px, 1px, 0);
+  }
+
+  90% {
+    transform: translate3d(0.8px, -0.5px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 
 .p3r-main.p3r-select-shake {
@@ -5195,11 +5238,11 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   .p3r-skills-container {
     margin-left: clamp(8px, 1.5vw, 16px) !important;
     width: calc(100% - clamp(16px, 3vw, 32px)) !important;
-    max-height: calc(100vh - clamp(92px, 15vh, 114px)) !important;
-    max-height: calc(100dvh - clamp(92px, 15vh, 114px)) !important;
+    max-height: calc(100vh - clamp(75px, 14vh, 95px)) !important;
+    max-height: calc(100dvh - clamp(75px, 14vh, 95px)) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    padding: 2px 4px clamp(12px, 2.5vh, 20px) 2px !important;
+    padding: 2px 4px clamp(20px, 4vh, 32px) 2px !important;
   }
 
   .p3r-cert-grid {
@@ -5228,9 +5271,20 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     padding: 1px 4px !important;
   }
 
+  .p3r-cert-thumb-wrap {
+    width: 100% !important;
+    aspect-ratio: auto !important;
+    height: clamp(54px, 10vh, 68px) !important;
+    max-height: clamp(54px, 10vh, 68px) !important;
+    overflow: hidden !important;
+    background: #020b18 !important;
+  }
+
   .p3r-cert-thumb {
-    height: clamp(58px, 10vh, 72px) !important;
+    width: 100% !important;
+    height: 100% !important;
     object-fit: cover !important;
+    object-position: top center !important;
     background: #010814 !important;
     border-radius: 2px !important;
   }
@@ -5269,6 +5323,24 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     padding: 2px 6px !important;
     font-size: clamp(0.54rem, 0.72vw, 0.62rem) !important;
     white-space: nowrap !important;
+  }
+
+  /* Modal Screen: Eliminate mobile scrolling flicker */
+  .portfolio-modal {
+    background-color: rgba(2, 10, 28, 0.98) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .portfolio-modal .modal-card {
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+  }
+
+  .portfolio-modal .modal-body {
+    -webkit-overflow-scrolling: touch !important;
+    transform: translateZ(0) !important;
+    will-change: scroll-position !important;
   }
 
   /* 9. ABOUT Subpage: Vertically Centered Layout matching PC aesthetics (left-docked card + slanted header) */
@@ -5555,18 +5627,22 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     background: #ea4335 !important;
     color: #ffffff !important;
   }
+
   .p3r-mail-row.is-github .p3r-mail-icon-block {
     background: #24292e !important;
     color: #ffffff !important;
   }
+
   .p3r-mail-row.is-linkedin .p3r-mail-icon-block {
     background: #0a66c2 !important;
     color: #ffffff !important;
   }
+
   .p3r-mail-row.is-kaggle .p3r-mail-icon-block {
     background: #20beff !important;
     color: #041630 !important;
   }
+
   .p3r-mail-row.is-instagram .p3r-mail-icon-block {
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888) !important;
     color: #ffffff !important;

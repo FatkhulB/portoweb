@@ -251,6 +251,56 @@ const certItemsData = [
     tagLabel: "FINANCE",
     image: "assets/certs/5.jpg",
     link: "https://dicoding.com/certificates/KEXLQKOVYPG2"
+  },
+  {
+    id: "cert-6",
+    title: "Mini Bootcamp : Introduction to Data Analytics Batch 14",
+    issuer: "DQLab",
+    year: "2026",
+    tag: "data",
+    tagLabel: "DATA SCIENCE",
+    image: "assets/certs/dq1.jpg",
+    link: "assets/certs/dq1.pdf"
+  },
+  {
+    id: "cert-7",
+    title: "Introduction to Data Science with Python",
+    issuer: "DQLab",
+    year: "2026",
+    tag: "python",
+    tagLabel: "PYTHON",
+    image: "assets/certs/dq2.jpg",
+    link: "assets/certs/dq2.pdf"
+  },
+  {
+    id: "cert-8",
+    title: "Study Case Bootcamp Data Analyst with SQL & Python",
+    issuer: "DQLab",
+    year: "2026",
+    tag: "sql",
+    tagLabel: "SQL",
+    image: "assets/certs/dq3.jpg",
+    link: "assets/certs/dq3.pdf"
+  },
+  {
+    id: "cert-9",
+    title: "Study Case Bootcamp Data Analyst with Excel",
+    issuer: "DQLab",
+    year: "2026",
+    tag: "other",
+    tagLabel: "EXCEL",
+    image: "assets/certs/dq4.jpg",
+    link: "assets/certs/dq4.pdf"
+  },
+  {
+    id: "cert-10",
+    title: "Study Case Bootcamp Machine Learning & AI for Beginner",
+    issuer: "DQLab",
+    year: "2026",
+    tag: "data",
+    tagLabel: "MACHINE LEARNING",
+    image: "assets/certs/dq5.jpg",
+    link: "assets/certs/dq5.pdf"
   }
 ];
 
@@ -1115,11 +1165,7 @@ function renderSlinkCards() {
 
     card.addEventListener("click", () => {
       if (isProjectPageOpen && !isWavyTransitionRunning) {
-        if (selectedSlinkIndex !== idx) {
-          selectSlinkCard(idx);
-        } else {
-          confirmSlinkSelection();
-        }
+        selectSlinkCard(idx);
       }
     });
 
@@ -1299,6 +1345,30 @@ function nextSkillTab() {
   setSkillTab(certTabsList[nextIdx].id);
 }
 
+let pausedVideosForModal = [];
+
+function pauseVideosForModal() {
+  pausedVideosForModal = [];
+  const videos = [skillBgVideo, slinkBgVideo, aboutBgVideo, contactBgVideo];
+  videos.forEach((v) => {
+    if (v && !v.paused) {
+      try {
+        v.pause();
+        pausedVideosForModal.push(v);
+      } catch (_) {}
+    }
+  });
+}
+
+function resumeVideosAfterModal() {
+  pausedVideosForModal.forEach((v) => {
+    try {
+      v.play().catch(() => {});
+    } catch (_) {}
+  });
+  pausedVideosForModal = [];
+}
+
 function openCertModal(cert, clickEvent) {
   if (!cert || !portfolioModal) return;
   modalTag.textContent = cert.tagLabel || "CERTIFICATE";
@@ -1321,13 +1391,14 @@ function openCertModal(cert, clickEvent) {
   portfolioModal.classList.add("active");
   portfolioModal.setAttribute("aria-hidden", "false");
   playOpenDetailSFX();
+  pauseVideosForModal();
 
   const origin = (clickEvent && typeof clickEvent.clientX === "number" && (clickEvent.clientX > 0 || clickEvent.clientY > 0))
     ? { x: clickEvent.clientX, y: clickEvent.clientY }
     : { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 };
   const targetRadius = calculateTargetRadius(origin);
 
-  portfolioModal.animate([
+  const anim = portfolioModal.animate([
     { clipPath: generateWavyPolygon(origin.x, origin.y, 0, 100, 6, 0.08, 12, 0.03, 0.0, 1.25, 1.05) },
     { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius * 0.45, 100, 6, 0.085, 12, 0.03, 1.0, 1.25, 1.05), offset: 0.4 },
     { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 100, 6, 0.05, 12, 0.015, 2.5, 1.15, 1.02) }
@@ -1336,6 +1407,11 @@ function openCertModal(cert, clickEvent) {
     easing: "cubic-bezier(0.2, 1, 0.35, 1)",
     fill: "forwards"
   });
+
+  anim.onfinish = () => {
+    portfolioModal.style.clipPath = "";
+    try { anim.cancel(); } catch (_) {}
+  };
 }
 
 function renderSkillStats(category = "all") {
@@ -1344,7 +1420,7 @@ function renderSkillStats(category = "all") {
 
   const filteredCerts = certItemsData.filter((c) => {
     if (category === "all") return true;
-    if (category === "other") return c.tag === "soft" || c.tag === "finance";
+    if (category === "other") return c.tag === "other" || c.tag === "soft" || c.tag === "finance";
     return c.tag === category;
   });
 
@@ -1369,7 +1445,7 @@ function renderSkillStats(category = "all") {
         <span class="p3r-cert-badge">${cert.tagLabel}</span>
       </div>
       <div class="p3r-cert-thumb-wrap">
-        <img src="${cert.image}" alt="${cert.title}" class="p3r-cert-thumb" loading="lazy" />
+        <img src="${cert.image}" alt="${cert.title}" class="p3r-cert-thumb" loading="eager" />
       </div>
       <div class="p3r-cert-body">
         <h3 class="p3r-cert-title">${cert.title}</h3>
@@ -1596,6 +1672,7 @@ function openModal(index) {
   portfolioModal.classList.add("active");
   portfolioModal.setAttribute("aria-hidden", "false");
   playOpenDetailSFX();
+  pauseVideosForModal();
 
   const origin = getOptionCenter(index);
   const targetRadius = calculateTargetRadius(origin);
@@ -1606,11 +1683,16 @@ function openModal(index) {
     { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 100, 6, 0.05, 12, 0.015, 2.5, 1.15, 1.02) }
   ];
 
-  portfolioModal.animate(keyframes, {
+  const anim = portfolioModal.animate(keyframes, {
     duration: 650,
     easing: "cubic-bezier(0.2, 1, 0.35, 1)",
     fill: "forwards"
   });
+
+  anim.onfinish = () => {
+    portfolioModal.style.clipPath = "";
+    try { anim.cancel(); } catch (_) {}
+  };
 }
 
 function closeModal() {
@@ -1634,6 +1716,7 @@ function closeModal() {
     portfolioModal.classList.remove("active");
     portfolioModal.setAttribute("aria-hidden", "true");
     portfolioModal.style.clipPath = "";
+    resumeVideosAfterModal();
   };
 }
 
