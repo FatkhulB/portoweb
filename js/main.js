@@ -1368,40 +1368,54 @@ function animateModalOpen(origin) {
     currentModalAnim = null;
   }
 
-  portfolioModal.style.clipPath = "";
+  const safeOrigin = (origin && typeof origin.x === "number" && typeof origin.y === "number")
+    ? origin
+    : { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 };
+
+  const targetRadius = calculateTargetRadius(safeOrigin);
+
+  portfolioModal.style.willChange = "clip-path, opacity";
   portfolioModal.classList.add("active");
   portfolioModal.setAttribute("aria-hidden", "false");
 
   const modalCard = portfolioModal.querySelector(".modal-card");
 
-  // Hardware-accelerated backdrop fade (pure compositor thread)
-  portfolioModal.animate([
-    { opacity: 0 },
-    { opacity: 1 }
+  // Persona 3 Reload authentic lightweight 32-point iris reveal wipe (300ms)
+  const anim = portfolioModal.animate([
+    { clipPath: generateWavyPolygon(safeOrigin.x, safeOrigin.y, 0, 32, 6, 0.08, 12, 0.03, 0.0, 1.25, 1.05), opacity: 0.8 },
+    { clipPath: generateWavyPolygon(safeOrigin.x, safeOrigin.y, targetRadius * 0.45, 32, 6, 0.08, 12, 0.03, 1.0, 1.25, 1.05), offset: 0.4 },
+    { clipPath: generateWavyPolygon(safeOrigin.x, safeOrigin.y, targetRadius, 32, 6, 0.04, 12, 0.015, 2.5, 1.15, 1.02), opacity: 1 }
   ], {
-    duration: 220,
+    duration: 300,
     easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-    fill: "both"
+    fill: "forwards"
   });
 
-  // Snappy Persona 3 card pop-in (transform + opacity compositor acceleration)
   if (modalCard) {
     modalCard.style.willChange = "transform, opacity";
-    const anim = modalCard.animate([
-      { transform: "scale(0.88) translateY(18px)", opacity: 0 },
+    modalCard.animate([
+      { transform: "scale(0.88) translateY(14px)", opacity: 0 },
       { transform: "scale(1.0) translateY(0)", opacity: 1 }
     ], {
-      duration: 240,
+      duration: 300,
       easing: "cubic-bezier(0.16, 1, 0.3, 1)",
       fill: "both"
     });
-    anim.onfinish = () => {
+  }
+
+  anim.onfinish = () => {
+    portfolioModal.style.clipPath = "";
+    portfolioModal.style.willChange = "";
+    portfolioModal.style.opacity = "";
+    if (modalCard) {
       modalCard.style.willChange = "";
       modalCard.style.transform = "";
       modalCard.style.opacity = "";
-    };
-    currentModalAnim = anim;
-  }
+    }
+    try { anim.cancel(); } catch (_) {}
+  };
+
+  currentModalAnim = anim;
 }
 
 function openCertModal(cert, clickEvent) {
@@ -1703,40 +1717,46 @@ function closeModal() {
     currentModalAnim = null;
   }
 
+  const exitOrigin = getModalExitOrigin();
+  const targetRadius = calculateTargetRadius(exitOrigin);
   const modalCard = portfolioModal.querySelector(".modal-card");
 
-  // Fast, silky smooth 180ms close animation
-  const bgAnim = portfolioModal.animate([
-    { opacity: 1 },
-    { opacity: 0 }
+  portfolioModal.style.willChange = "clip-path, opacity";
+
+  // Lightweight 32-point iris shrink wipe (220ms duration)
+  const closeAnim = portfolioModal.animate([
+    { clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 32, 8, 0.07, 16, 0.02, 0.0, 1.15, 1.25), opacity: 1 },
+    { clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 32, 8, 0.07, 16, 0.02, 2.5, 1.15, 1.25), opacity: 0.5 }
   ], {
-    duration: 180,
-    easing: "ease-out",
-    fill: "both"
+    duration: 220,
+    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    fill: "forwards"
   });
 
   if (modalCard) {
     modalCard.style.willChange = "transform, opacity";
     modalCard.animate([
       { transform: "scale(1.0) translateY(0)", opacity: 1 },
-      { transform: "scale(0.92) translateY(12px)", opacity: 0 }
+      { transform: "scale(0.92) translateY(10px)", opacity: 0 }
     ], {
-      duration: 180,
+      duration: 200,
       easing: "cubic-bezier(0.25, 1, 0.5, 1)",
       fill: "both"
     });
   }
 
-  bgAnim.onfinish = () => {
+  closeAnim.onfinish = () => {
     portfolioModal.classList.remove("active");
     portfolioModal.setAttribute("aria-hidden", "true");
     portfolioModal.style.clipPath = "";
+    portfolioModal.style.willChange = "";
     portfolioModal.style.opacity = "";
     if (modalCard) {
       modalCard.style.willChange = "";
       modalCard.style.transform = "";
       modalCard.style.opacity = "";
     }
+    try { closeAnim.cancel(); } catch (_) {}
   };
 }
 
@@ -2562,12 +2582,12 @@ function setupP3RMusicPlayer() {
 
     // Responsive width based on screen width
     const isMobileLandscape = vh <= 550 || vw <= 900;
-    const dialogWidth = Math.min(isMobileLandscape ? 320 : 360, vw - 16);
+    const dialogWidth = Math.min(isMobileLandscape ? 315 : 360, vw - 24);
     dialog.style.setProperty("width", `${dialogWidth}px`, "important");
-    dialog.style.setProperty("max-width", `${vw - 16}px`, "important");
+    dialog.style.setProperty("max-width", `${vw - 24}px`, "important");
 
     // Dialog rendered height or estimated fallback (single card player is sleek & compact)
-    const dialogHeight = dialog.offsetHeight || (isMobileLandscape ? 160 : 180);
+    const dialogHeight = dialog.offsetHeight || (isMobileLandscape ? 165 : 185);
 
     // Horizontal placement: anchor near launcher and clamp within screen bounds
     let left;
@@ -2579,8 +2599,8 @@ function setupP3RMusicPlayer() {
       // Launcher is on left half: align dialog left edge with launcher left edge
       left = launcherRect.left;
     }
-    // Clamp horizontally with 8px margin
-    left = Math.max(8, Math.min(left, vw - dialogWidth - 8));
+    // Clamp horizontally with at least 14px margin so -12deg slanted corners never clip or touch screen borders
+    left = Math.max(14, Math.min(left, vw - dialogWidth - 14));
 
     // Vertical placement: place below launcher if space permits, else above
     const spaceBelow = vh - launcherRect.bottom - 8;
@@ -2592,8 +2612,8 @@ function setupP3RMusicPlayer() {
     } else {
       top = launcherRect.top - dialogHeight - 8;
     }
-    // Clamp vertically with 8px margin
-    top = Math.max(8, Math.min(top, vh - dialogHeight - 8));
+    // Clamp vertically with 10px margin
+    top = Math.max(10, Math.min(top, vh - dialogHeight - 12));
 
     dialog.style.setProperty("position", "fixed", "important");
     dialog.style.setProperty("left", `${Math.round(left)}px`, "important");

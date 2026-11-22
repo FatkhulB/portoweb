@@ -1308,7 +1308,7 @@ body.project-screen-active .side-number {
 
 /* Custom Proportional Sizing per Headline - ABOUT (Extended Border to Right, Enlarged Cutout Text) */
 #about-header-div {
-  width: clamp(345px, 24vw, 440px);
+  width: clamp(375px, 26vw, 470px);
   height: clamp(86px, 10.4vh, 104px);
 }
 
@@ -1358,7 +1358,7 @@ body.project-screen-active .side-number {
 
 /* Custom Proportional Sizing per Headline - CERTIFICATE (Scaled identically to ABOUT) */
 #skill-header-div {
-  width: clamp(520px, 36vw, 610px);
+  width: clamp(555px, 38vw, 650px);
   height: clamp(86px, 10.4vh, 104px);
   margin-bottom: clamp(10px, 1.4vh, 16px);
 }
@@ -2976,6 +2976,7 @@ body.about-screen-active .character-viewport {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: #7de6fd;
+  white-space: nowrap;
 }
 
 .p3r-cert-thumb-wrap {
@@ -3014,6 +3015,7 @@ body.about-screen-active .character-viewport {
   letter-spacing: 0.06em;
   padding: 2px 9px;
   transform: skewX(-10deg);
+  white-space: nowrap;
 }
 
 .p3r-cert-body {
@@ -4826,19 +4828,19 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     position: fixed !important;
     z-index: 9995 !important;
     margin: 0 !important;
-    width: min(320px, 84vw) !important;
+    width: min(315px, 80vw) !important;
     max-height: 88vh !important;
     max-height: 88dvh !important;
-    padding: 6px 14px 10px !important;
+    padding: 6px 14px 16px !important;
     gap: 4px !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
     box-sizing: border-box !important;
   }
 
   .deck-hero-slanted {
-    padding: 0.55rem 1.0rem !important;
+    padding: 0.55rem 1.05rem 0.75rem !important;
     gap: 0.45rem !important;
+    overflow: visible !important;
   }
 
   .deck-hero-title {
@@ -4846,8 +4848,9 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   .deck-center-controls {
-    gap: 6px !important;
+    gap: 7px !important;
     margin-top: 5px !important;
+    margin-bottom: 3px !important;
   }
 
   .deck-ctrl-track-btn {
@@ -4908,8 +4911,8 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-div {
-    width: clamp(290px, 40vw, 370px) !important;
-    height: clamp(42px, 8.4vh, 48px) !important;
+    width: clamp(305px, 42vw, 385px) !important;
+    height: clamp(44px, 8.8vh, 50px) !important;
     margin-top: clamp(6px, 1.4vh, 10px) !important;
     margin-bottom: clamp(3px, 0.6vh, 5px) !important;
     transform: rotate(-2.8deg) !important;
@@ -4933,7 +4936,7 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-text .p3r-cutout-char {
-    font-size: clamp(1.10rem, 1.9vw, 1.35rem) !important;
+    font-size: clamp(1.18rem, 2.05vw, 1.42rem) !important;
     padding: 0.04em 0.09em 0.05em !important;
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
@@ -5223,13 +5226,15 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
-    gap: clamp(5px, 0.8vw, 8px) !important;
-    margin-left: clamp(6px, 1.2vw, 14px) !important;
+    gap: clamp(6px, 1.0vw, 9px) !important;
+    margin-left: clamp(4px, 1.0vw, 10px) !important;
     margin-bottom: clamp(4px, 0.8vh, 6px) !important;
-    padding-bottom: 2px !important;
-    width: calc(100% - clamp(12px, 2.4vw, 28px)) !important;
+    padding: 3px 14px 6px 10px !important;
+    width: calc(100% - clamp(8px, 1.8vw, 20px)) !important;
+    box-sizing: border-box !important;
   }
 
   .p3r-skill-tabs::-webkit-scrollbar {
@@ -5316,17 +5321,29 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   .p3r-cert-card-top {
-    padding: 2px 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    padding: 3px 6px !important;
     margin-bottom: 2px !important;
+    min-height: 22px !important;
+    box-sizing: border-box !important;
   }
 
   .p3r-cert-index {
-    font-size: 0.58rem !important;
+    font-size: clamp(0.52rem, 0.72vw, 0.60rem) !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.05em !important;
+    flex-shrink: 0 !important;
   }
 
   .p3r-cert-badge {
-    font-size: 0.54rem !important;
-    padding: 1px 4px !important;
+    font-size: clamp(0.48rem, 0.68vw, 0.56rem) !important;
+    padding: 1px 5px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    letter-spacing: 0.04em !important;
   }
 
   .p3r-cert-thumb-wrap {
