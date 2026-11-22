@@ -4909,8 +4909,8 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-div {
-    width: clamp(270px, 36vw, 325px) !important;
-    height: clamp(36px, 7.5vh, 42px) !important;
+    width: clamp(270px, 32.5vw, 282px) !important;
+    height: clamp(38px, 8.5vh, 44px) !important;
     margin-top: clamp(4px, 1.0vh, 8px) !important;
     margin-bottom: clamp(2px, 0.5vh, 4px) !important;
     transform: rotate(-2.8deg) !important;
@@ -4926,18 +4926,18 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-div #skill-header-text {
-    margin-left: clamp(42px, 5.0vw, 52px) !important;
+    margin-left: clamp(36px, 4.4vw, 42px) !important;
     width: auto !important;
     justify-content: flex-start !important;
   }
 
   #skill-header-div #skill-header-text .p3r-cutout-group {
-    gap: clamp(0.015rem, 0.05vw, 0.06rem) !important;
+    gap: clamp(0.01rem, 0.02vw, 0.025rem) !important;
   }
 
   #skill-header-text .p3r-cutout-char {
-    font-size: clamp(1.24rem, 2.2vw, 1.48rem) !important;
-    padding: 0.04em 0.08em 0.05em !important;
+    font-size: clamp(1.56rem, 2.7vw, 1.72rem) !important;
+    padding: 0.04em 0.07em 0.05em !important;
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
 
@@ -4987,8 +4987,8 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
 
   /* PROJECT Geometric Banner matching PC angled aesthetic */
   #project-page .p3r-geometric-header {
-    width: clamp(260px, 35vw, 330px) !important;
-    height: clamp(52px, 10.5vh, 64px) !important;
+    width: clamp(228px, 27vw, 246px) !important;
+    height: clamp(38px, 8.5vh, 44px) !important;
     transform: rotate(-4.2deg) !important;
     transform-origin: left center !important;
     margin-top: 0 !important;
@@ -5015,16 +5015,16 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #project-page .p3r-banner-title {
-    margin-left: clamp(48px, 5.5vw, 64px) !important;
+    margin-left: clamp(36px, 4.4vw, 42px) !important;
     height: 100% !important;
     display: flex !important;
     align-items: center !important;
   }
 
   #project-page .p3r-banner-title .p3r-cutout-char {
-    font-size: clamp(1.50rem, 2.7vw, 1.95rem) !important;
-    padding: 0.05em 0.12em 0.07em !important;
-    box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.9), 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+    font-size: clamp(1.68rem, 3.0vw, 1.90rem) !important;
+    padding: 0.04em 0.09em 0.06em !important;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
 
   #project-page .slink-cards-container {
@@ -5601,8 +5601,8 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #about-header-div {
-    width: clamp(185px, 24vw, 225px) !important;
-    height: clamp(36px, 7.5vh, 42px) !important;
+    width: clamp(170px, 20.5vw, 186px) !important;
+    height: clamp(38px, 8.5vh, 44px) !important;
     transform: rotate(-4.2deg) !important;
     transform-origin: left center !important;
     margin-top: clamp(2px, 0.6vh, 4px) !important;
@@ -5619,18 +5619,18 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #about-header-div #about-header-text {
-    margin-left: clamp(44px, 5.2vw, 54px) !important;
+    margin-left: clamp(36px, 4.4vw, 42px) !important;
     width: auto !important;
     justify-content: flex-start !important;
   }
 
   #about-header-div #about-header-text .p3r-cutout-group {
-    gap: clamp(0.03rem, 0.08vw, 0.08rem) !important;
+    gap: clamp(0.02rem, 0.06vw, 0.06rem) !important;
   }
 
   #about-header-text .p3r-cutout-char {
-    font-size: clamp(1.30rem, 2.4vw, 1.58rem) !important;
-    padding: 0.04em 0.10em 0.06em !important;
+    font-size: clamp(1.72rem, 3.1vw, 1.95rem) !important;
+    padding: 0.04em 0.09em 0.06em !important;
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
 
