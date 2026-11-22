@@ -1011,6 +1011,7 @@ function executeWavyReveal({
   pageEl.classList.remove("active");
   pageEl.classList.add("circle-transitioning");
   pageEl.setAttribute("aria-hidden", "false");
+  pageEl.style.willChange = "clip-path";
 
   // Pause main menu background video while subpage is displayed to eliminate dual-video GPU decode load
   if (bgVideoLoop && !bgVideoLoop.paused) {
@@ -1025,21 +1026,21 @@ function executeWavyReveal({
 
   const anim = pageEl.animate([
     { 
-      clipPath: generateWavyPolygon(origin.x, origin.y, 0, 72, 7, 0.085, 14, 0.035, 0.0, 1.25, 1.05) 
+      clipPath: generateWavyPolygon(origin.x, origin.y, 0, 48, 6, 0.08, 12, 0.03, 0.0, 1.25, 1.05) 
     },
     { 
-      clipPath: generateWavyPolygon(origin.x + 22, origin.y - 12, targetRadius * 0.45, 72, 7, 0.09, 14, 0.035, 1.2, 1.25, 1.05),
+      clipPath: generateWavyPolygon(origin.x + 18, origin.y - 10, targetRadius * 0.45, 48, 6, 0.085, 12, 0.03, 1.2, 1.25, 1.05),
       offset: 0.38
     },
     { 
-      clipPath: generateWavyPolygon(origin.x + 10, origin.y - 5, targetRadius * 0.85, 72, 7, 0.075, 14, 0.025, 2.2, 1.20, 1.05),
+      clipPath: generateWavyPolygon(origin.x + 8, origin.y - 4, targetRadius * 0.85, 48, 6, 0.07, 12, 0.02, 2.2, 1.20, 1.05),
       offset: 0.70
     },
     { 
-      clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 72, 7, 0.05, 14, 0.015, 3.4, 1.15, 1.02) 
+      clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 48, 6, 0.04, 12, 0.012, 3.4, 1.15, 1.02) 
     }
   ], {
-    duration,
+    duration: 440,
     easing,
     fill: "forwards"
   });
@@ -1048,6 +1049,7 @@ function executeWavyReveal({
     pageEl.classList.remove("circle-transitioning");
     pageEl.classList.add("active");
     pageEl.style.clipPath = "";
+    pageEl.style.willChange = "";
     if (bodyClass) document.body.classList.add(bodyClass);
     try { anim.cancel(); } catch (_) {}
     isWavyTransitionRunning = false;
@@ -1079,24 +1081,25 @@ function executeWavyClose({
 
   pageEl.classList.remove("active");
   pageEl.classList.add("circle-transitioning");
+  pageEl.style.willChange = "clip-path";
 
   const anim = pageEl.animate([
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 72, 9, 0.07, 18, 0.025, 0.0, 1.15, 1.25) 
+      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 48, 8, 0.07, 16, 0.02, 0.0, 1.15, 1.25) 
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x - 20, exitOrigin.y - 12, targetRadius * 0.80, 72, 9, 0.08, 18, 0.03, 1.0, 1.15, 1.25),
+      clipPath: generateWavyPolygon(exitOrigin.x - 16, exitOrigin.y - 10, targetRadius * 0.80, 48, 8, 0.075, 16, 0.025, 1.0, 1.15, 1.25),
       offset: 0.32
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x - 28, exitOrigin.y - 18, targetRadius * 0.42, 72, 9, 0.085, 18, 0.03, 2.0, 1.15, 1.25),
+      clipPath: generateWavyPolygon(exitOrigin.x - 22, exitOrigin.y - 14, targetRadius * 0.42, 48, 8, 0.08, 16, 0.025, 2.0, 1.15, 1.25),
       offset: 0.65
     },
     { 
-      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 72, 9, 0.08, 18, 0.025, 3.0, 1.15, 1.25) 
+      clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 48, 8, 0.07, 16, 0.02, 3.0, 1.15, 1.25) 
     }
   ], {
-    duration,
+    duration: 380,
     easing,
     fill: "forwards"
   });
@@ -1104,6 +1107,7 @@ function executeWavyClose({
   anim.onfinish = () => {
     pageEl.classList.remove("circle-transitioning", "active");
     pageEl.style.clipPath = "";
+    pageEl.style.willChange = "";
     pageEl.setAttribute("aria-hidden", "true");
     if (videoEl) videoEl.pause();
     // Resume main menu loop video seamlessly
@@ -1327,9 +1331,20 @@ function renderSkillsTabs() {
 }
 
 function setSkillTab(tabId) {
+  if (currentSkillTab === tabId) return;
   currentSkillTab = tabId;
   playSFX();
-  renderSkillsTabs();
+  if (skillTabsNav) {
+    const tabs = skillTabsNav.querySelectorAll(".p3r-skill-tab");
+    tabs.forEach((btn, idx) => {
+      const tabData = certTabsList[idx];
+      if (tabData) {
+        const isActive = (tabData.id === currentSkillTab);
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      }
+    });
+  }
   renderSkillStats(currentSkillTab);
 }
 
@@ -1345,28 +1360,48 @@ function nextSkillTab() {
   setSkillTab(certTabsList[nextIdx].id);
 }
 
-let pausedVideosForModal = [];
+let currentModalAnim = null;
 
-function pauseVideosForModal() {
-  pausedVideosForModal = [];
-  const videos = [skillBgVideo, slinkBgVideo, aboutBgVideo, contactBgVideo];
-  videos.forEach((v) => {
-    if (v && !v.paused) {
-      try {
-        v.pause();
-        pausedVideosForModal.push(v);
-      } catch (_) {}
-    }
-  });
-}
+function animateModalOpen(origin) {
+  if (currentModalAnim) {
+    try { currentModalAnim.cancel(); } catch (_) {}
+    currentModalAnim = null;
+  }
 
-function resumeVideosAfterModal() {
-  pausedVideosForModal.forEach((v) => {
-    try {
-      v.play().catch(() => {});
-    } catch (_) {}
+  portfolioModal.style.clipPath = "";
+  portfolioModal.classList.add("active");
+  portfolioModal.setAttribute("aria-hidden", "false");
+
+  const modalCard = portfolioModal.querySelector(".modal-card");
+
+  // Hardware-accelerated backdrop fade (pure compositor thread)
+  portfolioModal.animate([
+    { opacity: 0 },
+    { opacity: 1 }
+  ], {
+    duration: 220,
+    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+    fill: "both"
   });
-  pausedVideosForModal = [];
+
+  // Snappy Persona 3 card pop-in (transform + opacity compositor acceleration)
+  if (modalCard) {
+    modalCard.style.willChange = "transform, opacity";
+    const anim = modalCard.animate([
+      { transform: "scale(0.88) translateY(18px)", opacity: 0 },
+      { transform: "scale(1.0) translateY(0)", opacity: 1 }
+    ], {
+      duration: 240,
+      easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+      fill: "both"
+    });
+    anim.onfinish = () => {
+      modalCard.style.willChange = "";
+      modalCard.style.transform = "";
+      modalCard.style.opacity = "";
+    };
+    currentModalAnim = anim;
+  }
 }
 
 function openCertModal(cert, clickEvent) {
@@ -1388,30 +1423,13 @@ function openCertModal(cert, clickEvent) {
   `;
 
   isModalOpen = true;
-  portfolioModal.classList.add("active");
-  portfolioModal.setAttribute("aria-hidden", "false");
   playOpenDetailSFX();
-  pauseVideosForModal();
 
   const origin = (clickEvent && typeof clickEvent.clientX === "number" && (clickEvent.clientX > 0 || clickEvent.clientY > 0))
     ? { x: clickEvent.clientX, y: clickEvent.clientY }
     : { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 };
-  const targetRadius = calculateTargetRadius(origin);
 
-  const anim = portfolioModal.animate([
-    { clipPath: generateWavyPolygon(origin.x, origin.y, 0, 100, 6, 0.08, 12, 0.03, 0.0, 1.25, 1.05) },
-    { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius * 0.45, 100, 6, 0.085, 12, 0.03, 1.0, 1.25, 1.05), offset: 0.4 },
-    { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 100, 6, 0.05, 12, 0.015, 2.5, 1.15, 1.02) }
-  ], {
-    duration: 520,
-    easing: "cubic-bezier(0.2, 1, 0.35, 1)",
-    fill: "forwards"
-  });
-
-  anim.onfinish = () => {
-    portfolioModal.style.clipPath = "";
-    try { anim.cancel(); } catch (_) {}
-  };
+  animateModalOpen(origin);
 }
 
 function renderSkillStats(category = "all") {
@@ -1669,30 +1687,10 @@ function openModal(index) {
   });
 
   isModalOpen = true;
-  portfolioModal.classList.add("active");
-  portfolioModal.setAttribute("aria-hidden", "false");
   playOpenDetailSFX();
-  pauseVideosForModal();
 
   const origin = getOptionCenter(index);
-  const targetRadius = calculateTargetRadius(origin);
-
-  const keyframes = [
-    { clipPath: generateWavyPolygon(origin.x, origin.y, 0, 100, 6, 0.08, 12, 0.03, 0.0, 1.25, 1.05) },
-    { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius * 0.45, 100, 6, 0.085, 12, 0.03, 1.0, 1.25, 1.05), offset: 0.4 },
-    { clipPath: generateWavyPolygon(origin.x, origin.y, targetRadius, 100, 6, 0.05, 12, 0.015, 2.5, 1.15, 1.02) }
-  ];
-
-  const anim = portfolioModal.animate(keyframes, {
-    duration: 650,
-    easing: "cubic-bezier(0.2, 1, 0.35, 1)",
-    fill: "forwards"
-  });
-
-  anim.onfinish = () => {
-    portfolioModal.style.clipPath = "";
-    try { anim.cancel(); } catch (_) {}
-  };
+  animateModalOpen(origin);
 }
 
 function closeModal() {
@@ -1700,23 +1698,45 @@ function closeModal() {
   isModalOpen = false;
   playCloseDetailSFX();
 
-  const exitOrigin = getModalExitOrigin();
-  const targetRadius = calculateTargetRadius(exitOrigin);
+  if (currentModalAnim) {
+    try { currentModalAnim.cancel(); } catch (_) {}
+    currentModalAnim = null;
+  }
 
-  const closeAnim = portfolioModal.animate([
-    { clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, targetRadius, 100, 8, 0.07, 16, 0.025, 0.0, 1.15, 1.25) },
-    { clipPath: generateWavyPolygon(exitOrigin.x, exitOrigin.y, 0, 100, 8, 0.08, 16, 0.02, 2.5, 1.15, 1.25) }
+  const modalCard = portfolioModal.querySelector(".modal-card");
+
+  // Fast, silky smooth 180ms close animation
+  const bgAnim = portfolioModal.animate([
+    { opacity: 1 },
+    { opacity: 0 }
   ], {
-    duration: 600,
-    easing: "cubic-bezier(0.2, 1, 0.35, 1)",
-    fill: "forwards"
+    duration: 180,
+    easing: "ease-out",
+    fill: "both"
   });
 
-  closeAnim.onfinish = () => {
+  if (modalCard) {
+    modalCard.style.willChange = "transform, opacity";
+    modalCard.animate([
+      { transform: "scale(1.0) translateY(0)", opacity: 1 },
+      { transform: "scale(0.92) translateY(12px)", opacity: 0 }
+    ], {
+      duration: 180,
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+      fill: "both"
+    });
+  }
+
+  bgAnim.onfinish = () => {
     portfolioModal.classList.remove("active");
     portfolioModal.setAttribute("aria-hidden", "true");
     portfolioModal.style.clipPath = "";
-    resumeVideosAfterModal();
+    portfolioModal.style.opacity = "";
+    if (modalCard) {
+      modalCard.style.willChange = "";
+      modalCard.style.transform = "";
+      modalCard.style.opacity = "";
+    }
   };
 }
 

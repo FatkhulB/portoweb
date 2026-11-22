@@ -974,19 +974,22 @@ body.project-screen-active .side-number {
 }
 
 /* --------------------------------------------------------------------------
-   Portfolio Modal (Persona 3 Glassmorphism HUD Style)
+   Portfolio Modal (Persona 3 High-Performance Hardware-Accelerated HUD Style)
    -------------------------------------------------------------------------- */
 .portfolio-modal {
   position: fixed;
   inset: 0;
-  background-color: rgba(3, 20, 70, 0.88);
-  backdrop-filter: blur(6px);
+  background-color: rgba(2, 9, 26, 0.94);
   z-index: 300;
   display: none;
   justify-content: center;
   align-items: center;
   opacity: 0;
   pointer-events: none;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: opacity;
 }
 
 .portfolio-modal.active {
@@ -999,7 +1002,6 @@ body.project-screen-active .side-number {
   display: flex !important;
   opacity: 1 !important;
   pointer-events: none !important;
-  will-change: clip-path;
 }
 
 .modal-card {
@@ -1014,12 +1016,14 @@ body.project-screen-active .side-number {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transform: scale(0.9) translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .portfolio-modal.active .modal-card {
-  transform: scale(1) translateY(0);
+  transform: translateZ(0);
 }
 
 .modal-header {
@@ -2940,12 +2944,16 @@ body.about-screen-active .character-viewport {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
-  animation: p3rCertCardIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: p3rCertCardIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .p3r-cert-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   border-color: #ffffff;
   border-left-color: #16cffb;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.75), 0 0 18px rgba(22, 207, 251, 0.35);
@@ -2985,11 +2993,13 @@ body.about-screen-active .character-viewport {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.28s ease;
+  transform: translateZ(0);
+  will-change: transform;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .p3r-cert-card:hover .p3r-cert-thumb {
-  transform: scale(1.03);
+  transform: scale(1.03) translateZ(0);
 }
 
 .p3r-cert-badge {
