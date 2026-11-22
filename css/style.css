@@ -4898,11 +4898,11 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-div {
-    width: clamp(340px, 46vw, 440px) !important;
-    height: clamp(52px, 10.5vh, 66px) !important;
-    margin-top: 0 !important;
-    margin-bottom: clamp(3px, 0.7vh, 6px) !important;
-    transform: rotate(-4.2deg) !important;
+    width: clamp(290px, 40vw, 370px) !important;
+    height: clamp(42px, 8.4vh, 48px) !important;
+    margin-top: clamp(6px, 1.4vh, 10px) !important;
+    margin-bottom: clamp(3px, 0.6vh, 5px) !important;
+    transform: rotate(-2.8deg) !important;
     transform-origin: left center !important;
   }
 
@@ -4915,17 +4915,17 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   #skill-header-div #skill-header-text {
-    margin-left: clamp(48px, 5.5vw, 64px) !important;
+    margin-left: clamp(44px, 5.2vw, 56px) !important;
   }
 
   #skill-header-div #skill-header-text .p3r-cutout-group {
-    gap: clamp(0.02rem, 0.08vw, 0.10rem) !important;
+    gap: clamp(0.02rem, 0.07vw, 0.08rem) !important;
   }
 
   #skill-header-text .p3r-cutout-char {
-    font-size: clamp(1.45rem, 2.6vw, 1.85rem) !important;
-    padding: 0.05em 0.11em 0.07em !important;
-    box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.9), 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+    font-size: clamp(1.10rem, 1.9vw, 1.35rem) !important;
+    padding: 0.04em 0.09em 0.05em !important;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
 
   /* Mobile Corner Back Button on Mobile: Compact & sleek */
@@ -5082,16 +5082,16 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     width: 15px !important;
   }
 
-  /* PREVIEW PANEL: Proportionate width, full-bleed 16:9 hero image, gorgeous balanced typography */
+  /* PREVIEW PANEL: Proportionate width, full-bleed hero image, gorgeous balanced typography */
   #project-page .slink-preview-panel {
-    flex: 0 0 clamp(270px, 40vw, 350px) !important;
-    width: clamp(270px, 40vw, 350px) !important;
-    max-width: 360px !important;
+    flex: 0 0 clamp(270px, 40vw, 360px) !important;
+    width: clamp(270px, 40vw, 360px) !important;
+    max-width: 380px !important;
     align-self: flex-start !important;
-    margin-top: clamp(8px, 1.8vh, 16px) !important;
+    margin-top: clamp(4px, 1.0vh, 10px) !important;
     padding: 0 !important;
-    max-height: calc(100vh - clamp(18px, 3.8vh, 28px)) !important;
-    max-height: calc(100dvh - clamp(18px, 3.8vh, 28px)) !important;
+    max-height: calc(100vh - clamp(14px, 2.8vh, 22px)) !important;
+    max-height: calc(100dvh - clamp(14px, 2.8vh, 22px)) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
@@ -5103,21 +5103,22 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     box-sizing: border-box !important;
     background: rgba(4, 15, 38, 0.94) !important;
     border: 2px solid #16cffb !important;
-    border-radius: 6px !important;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), 0 0 16px rgba(22, 207, 251, 0.35) !important;
     overflow: hidden !important;
   }
 
   #project-page .slink-preview-image-wrap {
     width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9 !important;
-    max-height: clamp(85px, 19vh, 118px) !important;
-    border-radius: 0 !important;
+    height: clamp(105px, 25vh, 145px) !important;
+    max-height: clamp(105px, 25vh, 145px) !important;
+    aspect-ratio: auto !important;
     overflow: hidden !important;
     background: #010814 !important;
     position: relative !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     border-bottom: 2px solid #16cffb !important;
   }
 
@@ -5125,51 +5126,64 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     width: 100% !important;
     height: 100% !important;
     max-height: none !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
     object-position: center !important;
     display: block !important;
   }
 
   #project-page .slink-preview-badge {
-    left: 10px !important;
-    bottom: 8px !important;
-    font-size: 0.60rem !important;
+    left: 8px !important;
+    bottom: 6px !important;
+    font-size: 0.58rem !important;
     padding: 2px 7px !important;
   }
 
   #project-page .slink-preview-body {
     padding: clamp(4px, 0.8vh, 7px) clamp(10px, 1.4vw, 14px) 0 !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
   }
 
   #project-page .slink-preview-title {
-    font-size: clamp(0.80rem, 1.15vw, 0.98rem) !important;
-    margin: 0 0 2px !important;
-    line-height: 1.18 !important;
+    font-size: clamp(0.82rem, 1.2vw, 1.0rem) !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+    font-family: var(--font-skip), sans-serif !important;
+    font-style: italic !important;
+    font-weight: 800 !important;
   }
 
   #project-page .slink-preview-desc {
-    font-size: clamp(0.58rem, 0.78vw, 0.68rem) !important;
-    line-height: 1.22 !important;
-    margin-bottom: 4px !important;
+    font-size: clamp(0.56rem, 0.76vw, 0.66rem) !important;
+    line-height: 1.26 !important;
+    margin: 0 !important;
+    color: #cbd5e1 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
   }
 
   #project-page .slink-preview-tools {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 3px !important;
-    margin-bottom: 4px !important;
+    margin: 1px 0 !important;
   }
 
-  #project-page .slink-preview-tool-tag {
-    font-size: clamp(0.52rem, 0.70vw, 0.60rem) !important;
-    padding: 1px 5px !important;
+  #project-page .slink-tool-chip,
+  #project-page .slink-preview-tool-tag,
+  .slink-tool-chip {
+    font-size: clamp(0.50rem, 0.68vw, 0.58rem) !important;
+    padding: 1.5px 6px !important;
   }
 
   #project-page .slink-preview-actions {
     display: flex !important;
     justify-content: flex-end !important;
-    margin-top: 2px !important;
+    margin-top: 1px !important;
   }
 
   #project-page .slink-preview-open-btn {
@@ -5177,7 +5191,19 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     font-size: clamp(0.64rem, 0.85vw, 0.74rem) !important;
   }
 
-  /* 8. CERTIFICATE Subpage: Single-Line Horizontal Tabs + Balanced Grid */
+  /* 8. CERTIFICATE Subpage: Viewport Clearance, Single-Line Horizontal Tabs + Balanced Grid */
+  #skill-page .slink-viewport {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    padding: clamp(14px, 3.2vh, 20px) clamp(12px, 2.0vw, 20px) clamp(4px, 0.8vh, 8px) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
   #skill-page .slink-left-column {
     width: 100% !important;
     max-width: 100% !important;
@@ -5190,10 +5216,10 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
     gap: clamp(5px, 0.8vw, 8px) !important;
-    margin-left: clamp(8px, 1.5vw, 16px) !important;
+    margin-left: clamp(6px, 1.2vw, 14px) !important;
     margin-bottom: clamp(4px, 0.8vh, 6px) !important;
     padding-bottom: 2px !important;
-    width: calc(100% - clamp(16px, 3vw, 32px)) !important;
+    width: calc(100% - clamp(12px, 2.4vw, 28px)) !important;
   }
 
   .p3r-skill-tabs::-webkit-scrollbar {
@@ -5202,44 +5228,66 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
 
   .p3r-skill-tab {
     flex-shrink: 0 !important;
-    padding: clamp(2.5px, 0.5vh, 4.5px) clamp(7px, 1.0vw, 11px) !important;
-    height: clamp(26px, 4.2vh, 32px) !important;
+    transform: skewX(-14deg) !important;
+    background: rgba(2, 11, 24, 0.92) !important;
+    border: 1.5px solid rgba(22, 207, 251, 0.5) !important;
+    padding: clamp(2.5px, 0.5vh, 4.0px) clamp(8px, 1.1vw, 12px) !important;
+    height: clamp(26px, 4.8vh, 30px) !important;
     box-sizing: border-box !important;
+    display: flex !important;
     align-items: center !important;
-    font-size: clamp(0.64rem, 0.85vw, 0.74rem) !important;
     gap: 6px !important;
   }
 
-  .p3r-skill-tab .p3r-tab-tag,
-  .p3r-skill-tab.active .p3r-tab-tag {
-    font-size: clamp(0.60rem, 0.82vw, 0.70rem) !important;
-    padding: 0 !important;
-    background: transparent !important;
-    margin: 0 !important;
+  .p3r-skill-tab.active {
+    background: linear-gradient(90deg, #004fb3 0%, #16cffb 100%) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(22, 207, 251, 0.65), 2px 2px 0 #000000 !important;
+  }
+
+  .p3r-skill-tab .p3r-tab-tag {
+    font-size: clamp(0.58rem, 0.78vw, 0.68rem) !important;
     color: #16cffb !important;
+    background: transparent !important;
+    font-weight: 900 !important;
+    padding: 1px 4px !important;
+    border-radius: 2px !important;
+    margin: 0 !important;
   }
 
   .p3r-skill-tab.active .p3r-tab-tag {
-    color: #ffffff !important;
+    color: #020914 !important;
+    background: #ffffff !important;
+    font-weight: 900 !important;
+    padding: 1px 4px !important;
+    border-radius: 2px !important;
   }
 
-  .p3r-skill-tab .p3r-tab-label,
-  .p3r-skill-tab.active .p3r-tab-label {
-    font-size: clamp(0.64rem, 0.88vw, 0.76rem) !important;
+  .p3r-skill-tab .p3r-tab-label {
+    font-size: clamp(0.62rem, 0.82vw, 0.72rem) !important;
+    color: #e0f6ff !important;
+    font-weight: 800 !important;
     margin: 0 !important;
+  }
+
+  .p3r-skill-tab.active .p3r-tab-label {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+    font-weight: 900 !important;
   }
 
   .p3r-category-headline {
-    font-size: clamp(0.72rem, 1.0vw, 0.86rem) !important;
-    margin-bottom: 2px !important;
-    margin-left: clamp(8px, 1.5vw, 16px) !important;
+    font-size: clamp(0.70rem, 0.95vw, 0.82rem) !important;
+    margin-top: 1px !important;
+    margin-bottom: clamp(3px, 0.6vh, 5px) !important;
+    margin-left: clamp(6px, 1.2vw, 14px) !important;
   }
 
   .p3r-skills-container {
-    margin-left: clamp(8px, 1.5vw, 16px) !important;
-    width: calc(100% - clamp(16px, 3vw, 32px)) !important;
-    max-height: calc(100vh - clamp(75px, 14vh, 95px)) !important;
-    max-height: calc(100dvh - clamp(75px, 14vh, 95px)) !important;
+    margin-left: clamp(6px, 1.2vw, 14px) !important;
+    width: calc(100% - clamp(12px, 2.4vw, 28px)) !important;
+    max-height: calc(100vh - clamp(78px, 15vh, 98px)) !important;
+    max-height: calc(100dvh - clamp(78px, 15vh, 98px)) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     padding: 2px 4px clamp(20px, 4vh, 32px) 2px !important;
@@ -5325,7 +5373,7 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
     white-space: nowrap !important;
   }
 
-  /* Modal Screen: Eliminate mobile scrolling flicker */
+  /* Certificate Modal Preview: Highlight Certificate Prominently Without Scrolling */
   .portfolio-modal {
     background-color: rgba(2, 10, 28, 0.98) !important;
     backdrop-filter: none !important;
@@ -5333,14 +5381,175 @@ screen and (max-aspect-ratio: 1/1) and (max-width: 1024px) {
   }
 
   .portfolio-modal .modal-card {
+    width: min(94vw, 760px) !important;
+    max-width: 94vw !important;
+    height: auto !important;
+    max-height: 94vh !important;
+    max-height: 94dvh !important;
+    background: rgba(3, 16, 44, 0.98) !important;
+    border: 2px solid #16cffb !important;
+    border-radius: 6px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.92), 0 0 24px rgba(22, 207, 251, 0.4) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    margin: auto !important;
     transform: translateZ(0) !important;
     backface-visibility: hidden !important;
   }
 
+  .portfolio-modal .modal-header {
+    background: #ffffff !important;
+    color: #031433 !important;
+    padding: 4px 10px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 2px solid #16cffb !important;
+    box-sizing: border-box !important;
+  }
+
+  .portfolio-modal .modal-title-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .portfolio-modal .modal-tag {
+    font-size: 0.62rem !important;
+    padding: 1.5px 6px !important;
+    background: #031433 !important;
+    color: #ffffff !important;
+    border-radius: 2px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .portfolio-modal .modal-title {
+    font-size: clamp(0.78rem, 1.2vw, 0.92rem) !important;
+    font-family: var(--font-poppins), sans-serif !important;
+    font-weight: 800 !important;
+    font-style: italic !important;
+    color: #031433 !important;
+    margin: 0 !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .portfolio-modal .modal-close-btn {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    border-radius: 50% !important;
+    border: 1.5px solid #031433 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .portfolio-modal .modal-close-btn svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
   .portfolio-modal .modal-body {
+    padding: 6px 10px 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
     -webkit-overflow-scrolling: touch !important;
     transform: translateZ(0) !important;
     will-change: scroll-position !important;
+  }
+
+  .portfolio-modal #modal-summary {
+    display: none !important;
+  }
+
+  .portfolio-modal .modal-content-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  .portfolio-modal .p3r-modal-cert-preview {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: clamp(4px, 1.0vh, 7px) !important;
+  }
+
+  .portfolio-modal .p3r-modal-cert-img-wrap {
+    width: auto !important;
+    max-width: 100% !important;
+    height: clamp(190px, 60vh, 260px) !important;
+    max-height: clamp(190px, 60vh, 260px) !important;
+    background: #010814 !important;
+    border: 1.5px solid #16cffb !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(22, 207, 251, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .portfolio-modal .p3r-modal-cert-img {
+    width: auto !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  .portfolio-modal .p3r-modal-cert-meta {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-top: 2px !important;
+    box-sizing: border-box !important;
+  }
+
+  .portfolio-modal .p3r-modal-cert-desc {
+    font-size: clamp(0.58rem, 0.80vw, 0.68rem) !important;
+    color: #cbd5e1 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex: 1 !important;
+  }
+
+  .portfolio-modal .p3r-cert-credential-btn {
+    font-size: clamp(0.60rem, 0.82vw, 0.70rem) !important;
+    padding: 3px 9px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .portfolio-modal .modal-footer {
+    display: none !important;
   }
 
   /* 9. ABOUT Subpage: Vertically Centered Layout matching PC aesthetics (left-docked card + slanted header) */
