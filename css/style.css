@@ -286,14 +286,24 @@ body.project-screen-active .side-number {
   object-position: center center;
   display: block;
   pointer-events: none;
+  /* Persona 3 Reload 4K Ultra-HD Crisp Visual Enhancement */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(1.08) brightness(1.02) saturate(1.12);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, filter;
 }
 
 .opening-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.45) 100%),
-              linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 22%);
+  background: radial-gradient(circle at center, transparent 65%, rgba(0, 10, 25, 0.45) 100%),
+              linear-gradient(to top, rgba(0, 5, 15, 0.65) 0%, transparent 24%),
+              linear-gradient(to bottom, rgba(0, 5, 15, 0.45) 0%, transparent 20%);
 }
 
 /* Minimalist P3 "PRESS TO CONTINUE" Prompt (Bottom-Center, Non-obstructive) */

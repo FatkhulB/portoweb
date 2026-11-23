@@ -1236,7 +1236,7 @@ let isHistoryNavigating = false;
 function pushNavState(pageName) {
   if (isHistoryNavigating) return;
   try {
-    const currentHash = window.location.hash.replace("#", "");
+    const currentHash = (window.location.hash || "").replace("#", "");
     if (currentHash !== pageName) {
       history.pushState({ page: pageName }, "", "#" + pageName);
     }
@@ -1247,15 +1247,87 @@ function syncCloseToMainState() {
   if (isHistoryNavigating) return;
   try {
     if (!isProjectPageOpen && !isSkillPageOpen && !isAboutPageOpen && !isContactPageOpen) {
-      if (window.location.hash && window.location.hash !== "#main") {
-        history.pushState({ page: "main" }, "", "#main");
+      const currentHash = (window.location.hash || "").replace("#", "");
+      if (currentHash && currentHash !== "main") {
+        history.replaceState({ page: "main" }, "", "#main");
       }
     }
   } catch (err) {}
 }
 
+function forceCloseAllSubpages() {
+  isWavyTransitionRunning = false;
+  if (isProjectPageOpen || (projectPage && projectPage.classList.contains("active"))) {
+    isProjectPageOpen = false;
+    if (projectPage) {
+      projectPage.classList.remove("active", "circle-transitioning");
+      projectPage.style.clipPath = "";
+      projectPage.style.willChange = "";
+      projectPage.setAttribute("aria-hidden", "true");
+    }
+    if (slinkBgVideo) { try { slinkBgVideo.pause(); } catch (_) {} }
+  }
+  if (isSkillPageOpen || (skillPage && skillPage.classList.contains("active"))) {
+    isSkillPageOpen = false;
+    if (skillPage) {
+      skillPage.classList.remove("active", "circle-transitioning");
+      skillPage.style.clipPath = "";
+      skillPage.style.willChange = "";
+      skillPage.setAttribute("aria-hidden", "true");
+    }
+    if (skillBgVideo) { try { skillBgVideo.pause(); } catch (_) {} }
+  }
+  if (isAboutPageOpen || (aboutPage && aboutPage.classList.contains("active"))) {
+    isAboutPageOpen = false;
+    if (aboutPage) {
+      aboutPage.classList.remove("active", "circle-transitioning");
+      aboutPage.style.clipPath = "";
+      aboutPage.style.willChange = "";
+      aboutPage.setAttribute("aria-hidden", "true");
+    }
+    if (aboutBgVideo) { try { aboutBgVideo.pause(); } catch (_) {} }
+  }
+  if (isContactPageOpen || (contactPage && contactPage.classList.contains("active"))) {
+    isContactPageOpen = false;
+    if (contactPage) {
+      contactPage.classList.remove("active", "circle-transitioning");
+      contactPage.style.clipPath = "";
+      contactPage.style.willChange = "";
+      contactPage.setAttribute("aria-hidden", "true");
+    }
+    if (contactBgVideo) { try { contactBgVideo.pause(); } catch (_) {} }
+  }
+  document.body.classList.remove(
+    "project-screen-active",
+    "skill-screen-active",
+    "about-screen-active",
+    "contact-screen-active"
+  );
+}
+
+function handleInAppBackToMain() {
+  if (isModalOpen) {
+    closeModal();
+    return;
+  }
+  if (typeof isMusicModalOpen !== "undefined" && isMusicModalOpen) {
+    closeMusicModal();
+    return;
+  }
+  const currentHash = (window.location.hash || "").replace("#", "");
+  if (currentHash && currentHash !== "main" && currentHash !== "opening") {
+    window.history.back();
+  } else {
+    forceCloseAllSubpages();
+    if (currentHash !== "main") {
+      try { history.replaceState({ page: "main" }, "", "#main"); } catch (_) {}
+    }
+  }
+}
+
 function openProjectPage(clickEvent) {
-  if (isProjectPageOpen || isWavyTransitionRunning) return;
+  if (isProjectPageOpen) return;
+  isWavyTransitionRunning = false;
   isProjectPageOpen = true;
   selectedSlinkIndex = 0;
   pushNavState("project");
@@ -1275,7 +1347,8 @@ function openProjectPage(clickEvent) {
 }
 
 function closeProjectPage() {
-  if (!isProjectPageOpen || isWavyTransitionRunning) return;
+  if (!isProjectPageOpen) return;
+  isWavyTransitionRunning = false;
   isProjectPageOpen = false;
   syncCloseToMainState();
 
@@ -1515,7 +1588,8 @@ function renderSkillStats(category = "all") {
 }
 
 function openSkillPage(clickEvent) {
-  if (isSkillPageOpen || isWavyTransitionRunning) return;
+  if (isSkillPageOpen) return;
+  isWavyTransitionRunning = false;
   isSkillPageOpen = true;
   pushNavState("certificate");
   playConfirmSFX();
@@ -1534,7 +1608,8 @@ function openSkillPage(clickEvent) {
 }
 
 function closeSkillPage() {
-  if (!isSkillPageOpen || isWavyTransitionRunning) return;
+  if (!isSkillPageOpen) return;
+  isWavyTransitionRunning = false;
   isSkillPageOpen = false;
   syncCloseToMainState();
 
@@ -1580,7 +1655,8 @@ function cycleAboutTab(delta) {
 }
 
 function openAboutPage(clickEvent) {
-  if (isAboutPageOpen || isWavyTransitionRunning) return;
+  if (isAboutPageOpen) return;
+  isWavyTransitionRunning = false;
   isAboutPageOpen = true;
   pushNavState("about");
   playConfirmSFX();
@@ -1598,7 +1674,8 @@ function openAboutPage(clickEvent) {
 }
 
 function closeAboutPage() {
-  if (!isAboutPageOpen || isWavyTransitionRunning) return;
+  if (!isAboutPageOpen) return;
+  isWavyTransitionRunning = false;
   isAboutPageOpen = false;
   syncCloseToMainState();
 
@@ -1636,7 +1713,8 @@ function triggerContactPhoneAnimation() {
 }
 
 function openContactPage(clickEvent) {
-  if (isContactPageOpen || isWavyTransitionRunning) return;
+  if (isContactPageOpen) return;
+  isWavyTransitionRunning = false;
   isContactPageOpen = true;
   pushNavState("contact");
   playConfirmSFX();
@@ -1654,7 +1732,8 @@ function openContactPage(clickEvent) {
 }
 
 function closeContactPage() {
-  if (!isContactPageOpen || isWavyTransitionRunning) return;
+  if (!isContactPageOpen) return;
+  isWavyTransitionRunning = false;
   isContactPageOpen = false;
   syncCloseToMainState();
 
@@ -1917,26 +1996,38 @@ async function startLoadingSequence() {
     }, 400);
   }
 
+  // Ensure initial hash is #opening if not navigating directly to a deep-linked page
+  try {
+    const rawHash = (window.location.hash || "").replace("#", "");
+    if (!rawHash || rawHash === "opening") {
+      history.replaceState({ page: "opening" }, "", "#opening");
+    }
+  } catch (_) {}
+
   if (openingScreen) {
+    openingScreen.classList.remove("dismissed");
     openingScreen.style.display = "flex";
     if (openingVideo) {
       openingVideo.currentTime = 0;
       openingVideo.muted = false;
+      openingVideo.volume = 1.0;
       const playP = openingVideo.play();
       if (playP !== undefined) {
         playP.catch((err) => {
-          console.warn("Unmuted autoplay restricted by browser policy; starting muted:", err);
+          console.warn("Unmuted autoplay restricted by browser policy; starting muted until user gesture:", err);
           openingVideo.muted = true;
           openingVideo.play().catch(() => {});
 
-          const enableAudioOnGesture = () => {
-            if (!isStarted && openingVideo) {
+          const autoUnmuteOnGesture = () => {
+            if (openingVideo) {
               openingVideo.muted = false;
+              openingVideo.volume = 1.0;
             }
           };
-          window.addEventListener("click", enableAudioOnGesture, { once: true });
-          window.addEventListener("touchstart", enableAudioOnGesture, { once: true });
-          window.addEventListener("keydown", enableAudioOnGesture, { once: true });
+          window.addEventListener("pointerdown", autoUnmuteOnGesture, { once: true, capture: true });
+          window.addEventListener("touchstart", autoUnmuteOnGesture, { once: true, capture: true });
+          window.addEventListener("click", autoUnmuteOnGesture, { once: true, capture: true });
+          window.addEventListener("keydown", autoUnmuteOnGesture, { once: true, capture: true });
         });
       }
     }
@@ -1944,7 +2035,7 @@ async function startLoadingSequence() {
 }
 
 function triggerContinueToMenu(e) {
-  if (!isLoaded || isStarted) return;
+  if (isStarted) return;
   if (e && e.cancelable) e.preventDefault();
 
   const continueBtn = document.getElementById("p3r-continue-btn");
@@ -1968,6 +2059,13 @@ function triggerContinueToMenu(e) {
     }, 450);
   }
 
+  // Push #main to history so browser back navigates cleanly to #opening
+  if ((window.location.hash || "") !== "#main") {
+    try {
+      history.pushState({ page: "main" }, "", "#main");
+    } catch (_) {}
+  }
+
   setTimeout(() => {
     enterExperience();
   }, 220);
@@ -1975,7 +2073,7 @@ function triggerContinueToMenu(e) {
 
 if (openingScreen) {
   openingScreen.addEventListener("click", (e) => {
-    if (isLoaded && !isStarted) {
+    if (!isStarted) {
       triggerContinueToMenu(e);
     }
   });
@@ -1985,6 +2083,14 @@ const continueBtn = document.getElementById("p3r-continue-btn");
 if (continueBtn) {
   continueBtn.addEventListener("click", triggerContinueToMenu);
 }
+
+window.addEventListener("keydown", (e) => {
+  if (!isStarted && isLoaded && openingScreen && openingScreen.style.display !== "none") {
+    if (e.key === "Enter" || e.key === " " || e.key === "Escape" || e.key.startsWith("Arrow")) {
+      triggerContinueToMenu(e);
+    }
+  }
+});
 
 if (loadingScreen) {
   loadingScreen.addEventListener("click", (e) => {
@@ -2053,11 +2159,11 @@ if (portfolioModal) {
 
 if (slinkConfirmBtn) slinkConfirmBtn.addEventListener("click", confirmSlinkSelection);
 if (slinkPreviewOpenBtn) slinkPreviewOpenBtn.addEventListener("click", confirmSlinkSelection);
-if (slinkBackBtn) slinkBackBtn.addEventListener("click", closeProjectPage);
-if (skillBackBtn) skillBackBtn.addEventListener("click", closeSkillPage);
+if (slinkBackBtn) slinkBackBtn.addEventListener("click", handleInAppBackToMain);
+if (skillBackBtn) skillBackBtn.addEventListener("click", handleInAppBackToMain);
 if (skillTabPrevBtn) skillTabPrevBtn.addEventListener("click", prevSkillTab);
 if (skillTabNextBtn) skillTabNextBtn.addEventListener("click", nextSkillTab);
-if (aboutBackBtn) aboutBackBtn.addEventListener("click", closeAboutPage);
+if (aboutBackBtn) aboutBackBtn.addEventListener("click", handleInAppBackToMain);
 if (aboutTabs && aboutTabs.length > 0) {
   aboutTabs.forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -2067,7 +2173,7 @@ if (aboutTabs && aboutTabs.length > 0) {
     });
   });
 }
-if (contactBackBtn) contactBackBtn.addEventListener("click", closeContactPage);
+if (contactBackBtn) contactBackBtn.addEventListener("click", handleInAppBackToMain);
 
 const hudConfirmBtn = document.getElementById("hud-confirm-btn");
 if (hudConfirmBtn) {
@@ -2359,51 +2465,140 @@ cornerBackButtons.forEach(({ id, fn }) => {
   }
 });
 
+function returnToOpeningScreen() {
+  forceCloseAllSubpages();
+  if (isModalOpen) closeModal();
+  if (typeof isMusicModalOpen !== "undefined" && isMusicModalOpen) closeMusicModal();
+
+  // Pause main menu BGM & loop video
+  if (bgmLobbyEl && !bgmLobbyEl.paused) {
+    try { bgmLobbyEl.pause(); } catch (_) {}
+  }
+  if (bgVideoLoop && !bgVideoLoop.paused) {
+    try { bgVideoLoop.pause(); } catch (_) {}
+  }
+  if (bgVideoIntro && !bgVideoIntro.paused) {
+    try { bgVideoIntro.pause(); } catch (_) {}
+  }
+
+  // Hide music launcher
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.remove("is-visible");
+
+  isStarted = false;
+
+  // Reveal opening screen
+  if (openingScreen) {
+    openingScreen.classList.remove("dismissed");
+    openingScreen.style.display = "flex";
+    openingScreen.style.opacity = "1";
+    openingScreen.style.transform = "scale(1)";
+    openingScreen.setAttribute("aria-hidden", "false");
+  }
+
+  const continueBtn = document.getElementById("p3r-continue-btn");
+  if (continueBtn) {
+    continueBtn.classList.remove("activating");
+  }
+
+  if (openingVideo) {
+    openingVideo.currentTime = 0;
+    openingVideo.muted = false;
+    openingVideo.volume = 1.0;
+    const playP = openingVideo.play();
+    if (playP !== undefined) {
+      playP.catch((err) => {
+        console.warn("Opening playback notice:", err);
+        openingVideo.muted = true;
+        openingVideo.play().catch(() => {});
+      });
+    }
+  }
+}
+
+function ensureMainMenuActive() {
+  forceCloseAllSubpages();
+  if (openingScreen) {
+    openingScreen.style.display = "none";
+    if (openingVideo) { try { openingVideo.pause(); } catch (_) {} }
+  }
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
+  if (bgVideoLoop && bgVideoLoop.paused) {
+    bgVideoLoop.play().catch(() => {});
+  }
+  const menuLeftDock = document.getElementById("menu-left-dock");
+  if (menuLeftDock) menuLeftDock.classList.add("menu-entered");
+  const menuColumn = document.getElementById("menu-column");
+  if (menuColumn) menuColumn.classList.add("menu-entered");
+  const menuProfileHeader = document.getElementById("menu-profile-header");
+  if (menuProfileHeader) menuProfileHeader.classList.add("menu-entered");
+  isStarted = true;
+}
+
+function ensureSubpageActive(pageName) {
+  if (openingScreen) {
+    openingScreen.style.display = "none";
+    if (openingVideo) { try { openingVideo.pause(); } catch (_) {} }
+  }
+  isStarted = true;
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
+
+  if (pageName === "project") {
+    if (isSkillPageOpen) closeSkillPage();
+    if (isAboutPageOpen) closeAboutPage();
+    if (isContactPageOpen) closeContactPage();
+    if (!isProjectPageOpen) openProjectPage();
+  } else if (["certificate", "skill", "skills"].includes(pageName)) {
+    if (isProjectPageOpen) closeProjectPage();
+    if (isAboutPageOpen) closeAboutPage();
+    if (isContactPageOpen) closeContactPage();
+    if (!isSkillPageOpen) openSkillPage();
+  } else if (pageName === "about") {
+    if (isProjectPageOpen) closeProjectPage();
+    if (isSkillPageOpen) closeSkillPage();
+    if (isContactPageOpen) closeContactPage();
+    if (!isAboutPageOpen) openAboutPage();
+  } else if (pageName === "contact") {
+    if (isProjectPageOpen) closeProjectPage();
+    if (isSkillPageOpen) closeSkillPage();
+    if (isAboutPageOpen) closeAboutPage();
+    if (!isContactPageOpen) openContactPage();
+  }
+}
+
 // Popstate Listener: Browser Back/Forward Navigation without about:blank
 window.addEventListener("popstate", (e) => {
   isHistoryNavigating = true;
   try {
     // If any modal is active, dismiss it first
-    if (typeof certModal !== "undefined" && certModal && certModal.classList.contains("active")) {
-      closeCertModal();
+    if (isModalOpen || (portfolioModal && portfolioModal.classList.contains("active"))) {
+      closeModal();
       return;
     }
-    if (typeof projectModal !== "undefined" && projectModal && projectModal.classList.contains("active")) {
-      closeProjectModal();
-      return;
-    }
-    if (typeof p3rMusicModal !== "undefined" && p3rMusicModal && p3rMusicModal.classList.contains("active")) {
+    if (typeof isMusicModalOpen !== "undefined" && isMusicModalOpen) {
       closeMusicModal();
       return;
     }
 
-    const targetPage = (e.state && e.state.page) || window.location.hash.replace("#", "") || "main";
+    const rawHash = (window.location.hash || "").replace("#", "");
+    const targetPage = (e.state && e.state.page) || rawHash || (isStarted ? "main" : "opening");
 
-    if (targetPage === "main" || !targetPage) {
-      if (isProjectPageOpen) closeProjectPage();
-      if (isSkillPageOpen) closeSkillPage();
-      if (isAboutPageOpen) closeAboutPage();
-      if (isContactPageOpen) closeContactPage();
+    if (targetPage === "opening" || (!targetPage && !isStarted)) {
+      returnToOpeningScreen();
+    } else if (targetPage === "main" || !targetPage) {
+      ensureMainMenuActive();
     } else if (targetPage === "project") {
-      if (isSkillPageOpen) closeSkillPage();
-      if (isAboutPageOpen) closeAboutPage();
-      if (isContactPageOpen) closeContactPage();
-      if (!isProjectPageOpen) openProjectPage();
-    } else if (targetPage === "certificate" || targetPage === "skill" || targetPage === "skills") {
-      if (isProjectPageOpen) closeProjectPage();
-      if (isAboutPageOpen) closeAboutPage();
-      if (isContactPageOpen) closeContactPage();
-      if (!isSkillPageOpen) openSkillPage();
+      ensureSubpageActive("project");
+    } else if (["certificate", "skill", "skills"].includes(targetPage)) {
+      ensureSubpageActive("certificate");
     } else if (targetPage === "about") {
-      if (isProjectPageOpen) closeProjectPage();
-      if (isSkillPageOpen) closeSkillPage();
-      if (isContactPageOpen) closeContactPage();
-      if (!isAboutPageOpen) openAboutPage();
+      ensureSubpageActive("about");
     } else if (targetPage === "contact") {
-      if (isProjectPageOpen) closeProjectPage();
-      if (isSkillPageOpen) closeSkillPage();
-      if (isAboutPageOpen) closeAboutPage();
-      if (!isContactPageOpen) openContactPage();
+      ensureSubpageActive("contact");
     }
   } finally {
     setTimeout(() => { isHistoryNavigating = false; }, 350);
@@ -2412,9 +2607,11 @@ window.addEventListener("popstate", (e) => {
 
 // Initial history state check
 try {
-  if (!history.state) {
-    const initialHash = window.location.hash.replace("#", "");
-    history.replaceState({ page: initialHash || "main" }, "", initialHash ? ("#" + initialHash) : "#main");
+  const initialHash = (window.location.hash || "").replace("#", "");
+  if (!initialHash) {
+    history.replaceState({ page: "opening" }, "", "#opening");
+  } else if (!history.state) {
+    history.replaceState({ page: initialHash }, "", "#" + initialHash);
   }
 } catch (err) {}
 
