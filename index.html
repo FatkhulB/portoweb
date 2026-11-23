@@ -14,25 +14,34 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap"></noscript>
-  <link rel="stylesheet" href="css/style.css?v=91">
+  <link rel="stylesheet" href="css/style.css?v=92">
 </head>
 <body>
   <!-- Persona 3 Style Initial Loading Screen -->
   <div id="loading-screen" class="p3r-loading-screen" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-    <!-- Step 1: Loading Indicator GIF -->
+    <!-- Loading Indicator GIF -->
     <div id="loading-indicator-wrap" class="loading-indicator-wrap">
       <img id="loading-gif" class="loading-gif" src="assets/InitLoading.gif" alt="Loading" height="60" />
       <span id="loading-status-text" class="loading-text" style="display: none !important;"></span>
     </div>
-
-    <!-- Step 2: Post-Loading Title Screen Prompt (Click Button to Continue) -->
-    <div id="loading-continue-wrap" class="loading-continue-wrap" style="display: none;">
-      <button id="p3r-continue-btn" class="p3r-continue-btn" type="button" aria-label="Click to Continue">
-        <span class="continue-text">CLICK TO CONTINUE</span>
-      </button>
-      <div class="continue-subtext">PRESS ANY KEY OR CLICK TO ENTER</div>
-    </div>
   </div>
+
+  <!-- Persona 3 Reload Opening Video Screen (Appears after initial loading) -->
+  <section id="opening-screen" class="p3r-opening-screen" style="display: none;" aria-label="Persona 3 Reload Opening Screen">
+    <div class="opening-video-wrap">
+      <video id="opening-video" class="opening-video" loop playsinline preload="auto">
+        <source src="assets/opening.mp4" type="video/mp4">
+      </video>
+      <div class="opening-vignette" aria-hidden="true"></div>
+    </div>
+
+    <!-- Minimalist P3 Style Press to Continue Prompt -->
+    <div class="opening-prompt-wrap" id="opening-prompt-wrap">
+      <button id="p3r-continue-btn" class="p3r-press-continue-btn" type="button" aria-label="Press to Continue">
+        <span class="p3r-prompt-text">PRESS TO CONTINUE</span>
+      </button>
+    </div>
+  </section>
 
   <!-- Persona 3 Reload Mobile Portrait Blocker & Orientation Guide -->
   <aside id="p3r-rotate-overlay" class="p3r-rotate-overlay" role="alertdialog" aria-live="assertive" aria-modal="true" aria-label="Please Rotate Your Device">
@@ -802,6 +811,6 @@
     </div>
   </aside>
 
-  <script src="js/main.js?v=91" defer></script>
+  <script src="js/main.js?v=92" defer></script>
 </body>
 </html>

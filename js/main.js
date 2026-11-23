@@ -374,11 +374,13 @@ const contactBgVideo = document.getElementById("contact-bg-video");
 const contactBackBtn = document.getElementById("contact-back-btn");
 const contactMailRows = document.querySelectorAll(".p3r-mail-row");
 
-// DOM Elements: Loading Screen
+// DOM Elements: Loading Screen & Opening Screen
 const loadingScreen = document.getElementById("loading-screen");
 const loadingIndicatorWrap = document.getElementById("loading-indicator-wrap");
 const loadingStatusText = document.getElementById("loading-status-text");
 const loadingStateText = document.getElementById("loading-state-text");
+const openingScreen = document.getElementById("opening-screen");
+const openingVideo = document.getElementById("opening-video");
 const bgmLobbyEl = document.getElementById("bgm-lobby-el");
 const toggleBgmBtn = document.getElementById("toggle-bgm-btn");
 const toggleSfxBtn = document.getElementById("toggle-sfx-btn");
@@ -427,7 +429,7 @@ function getAudioContext() {
 }
 
 function ensureBGM() {
-  if (!bgmLobbyEl || isBgmMuted) return;
+  if (!isStarted || !bgmLobbyEl || isBgmMuted) return;
   bgmLobbyEl.loop = true;
   if (bgmLobbyEl.paused) {
     bgmLobbyEl.muted = false;
@@ -453,7 +455,7 @@ function ensureBGM() {
 }
 
 function unlockAndPlayAudio() {
-  if (!bgmLobbyEl || isBgmMuted) return;
+  if (!isStarted || !bgmLobbyEl || isBgmMuted) return;
   if (bgmLobbyEl.muted) {
     bgmLobbyEl.muted = false;
     bgmLobbyEl.volume = 0.35;
@@ -470,19 +472,15 @@ function unlockAndPlayAudio() {
   }
 }
 
-// Continuous global listeners to ensure instant music play on ANY interaction
+// Continuous global listeners to ensure instant music play on ANY interaction once game is started
 const audioGestureEvents = ["click", "pointerdown", "touchstart", "touchend", "mousedown", "keydown"];
 audioGestureEvents.forEach((evt) => {
   window.addEventListener(evt, unlockAndPlayAudio, { passive: true });
   document.addEventListener(evt, unlockAndPlayAudio, { passive: true });
 });
 
-// Immediately attempt playback on script load, DOM ready, and window load
-ensureBGM();
-window.addEventListener("DOMContentLoaded", ensureBGM);
-window.addEventListener("load", ensureBGM);
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && !isBgmMuted) ensureBGM();
+  if (isStarted && !document.hidden && !isBgmMuted) ensureBGM();
 });
 
 function updateAudioToggleUI() {
@@ -594,7 +592,7 @@ function playAudioChannel({
   volume = 0.6,
   onPlaySuccess
 }) {
-  if ((isLoaded || isStarted) && !isBgmMuted) {
+  if (isStarted && !isBgmMuted) {
     ensureBGM();
   }
 
@@ -758,7 +756,7 @@ async function unlockAudioEngine() {
     } catch (_) {}
   }
 
-  if (isLoaded || isStarted) {
+  if (isStarted && !isBgmMuted) {
     ensureBGM();
   }
 }
@@ -1901,8 +1899,6 @@ async function startLoadingSequence() {
 
   if (loadingStatusText) loadingStatusText.textContent = "Loading...";
   if (loadingIndicatorWrap) loadingIndicatorWrap.style.display = "flex";
-  const continueWrap = document.getElementById("loading-continue-wrap");
-  if (continueWrap) continueWrap.style.display = "none";
 
   const fontPromise = (document.fonts && document.fonts.ready)
     ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 800))]).catch(() => {})
@@ -1913,12 +1909,37 @@ async function startLoadingSequence() {
 
   isLoaded = true;
 
-  // Reveal the title screen "CLICK TO CONTINUE" button
-  if (loadingIndicatorWrap) {
-    loadingIndicatorWrap.style.display = "none";
+  // Transition from Loading Screen to Opening Screen
+  if (loadingScreen) {
+    loadingScreen.classList.add("dismissed");
+    setTimeout(() => {
+      loadingScreen.style.display = "none";
+    }, 400);
   }
-  if (continueWrap) {
-    continueWrap.style.display = "flex";
+
+  if (openingScreen) {
+    openingScreen.style.display = "flex";
+    if (openingVideo) {
+      openingVideo.currentTime = 0;
+      openingVideo.muted = false;
+      const playP = openingVideo.play();
+      if (playP !== undefined) {
+        playP.catch((err) => {
+          console.warn("Unmuted autoplay restricted by browser policy; starting muted:", err);
+          openingVideo.muted = true;
+          openingVideo.play().catch(() => {});
+
+          const enableAudioOnGesture = () => {
+            if (!isStarted && openingVideo) {
+              openingVideo.muted = false;
+            }
+          };
+          window.addEventListener("click", enableAudioOnGesture, { once: true });
+          window.addEventListener("touchstart", enableAudioOnGesture, { once: true });
+          window.addEventListener("keydown", enableAudioOnGesture, { once: true });
+        });
+      }
+    }
   }
 }
 
@@ -1934,16 +1955,38 @@ function triggerContinueToMenu(e) {
   unlockAudioEngine();
   playConfirmSFX();
 
+  if (openingVideo) {
+    try {
+      openingVideo.pause();
+    } catch (_) {}
+  }
+
+  if (openingScreen) {
+    openingScreen.classList.add("dismissed");
+    setTimeout(() => {
+      openingScreen.style.display = "none";
+    }, 450);
+  }
+
   setTimeout(() => {
     enterExperience();
   }, 220);
 }
 
+if (openingScreen) {
+  openingScreen.addEventListener("click", (e) => {
+    if (isLoaded && !isStarted) {
+      triggerContinueToMenu(e);
+    }
+  });
+}
+
+const continueBtn = document.getElementById("p3r-continue-btn");
+if (continueBtn) {
+  continueBtn.addEventListener("click", triggerContinueToMenu);
+}
+
 if (loadingScreen) {
-  const continueBtn = document.getElementById("p3r-continue-btn");
-  if (continueBtn) {
-    continueBtn.addEventListener("click", triggerContinueToMenu);
-  }
   loadingScreen.addEventListener("click", (e) => {
     if (isLoaded && !isStarted) {
       triggerContinueToMenu(e);
@@ -1955,14 +1998,24 @@ function enterExperience() {
   if (isStarted) return;
   isStarted = true;
 
-  ensureBGM();
-
   if (loadingScreen) {
-    loadingScreen.classList.add("dismissed");
-    setTimeout(() => {
-      loadingScreen.style.display = "none";
-    }, 450);
+    loadingScreen.style.display = "none";
   }
+  if (openingScreen) {
+    openingScreen.style.display = "none";
+    if (openingVideo) {
+      try { openingVideo.pause(); } catch (_) {}
+    }
+  }
+
+  // Reveal floating music launcher button on main menu
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) {
+    launcher.classList.add("is-visible");
+  }
+
+  // Start background soundtrack on main menu
+  ensureBGM();
 
   const menuLeftDock = document.getElementById("menu-left-dock");
   if (menuLeftDock) menuLeftDock.classList.add("menu-entered");
@@ -2366,17 +2419,24 @@ try {
 } catch (err) {}
 
 // URL Navigation Shortcuts & Responsive Init (Runs seamlessly on Desktop, iPad, Tablet, Mobile)
-ensureBGM();
 if (urlParams.get("page") === "project") {
   if (loadingScreen) loadingScreen.style.display = "none";
+  if (openingScreen) openingScreen.style.display = "none";
   isStarted = true;
   isLoaded = true;
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
   openProjectPage();
   triggerProjectTitleAnimation();
 } else if (["skill", "skills", "certificate", "certificates", "cert"].includes(urlParams.get("page"))) {
   if (loadingScreen) loadingScreen.style.display = "none";
+  if (openingScreen) openingScreen.style.display = "none";
   isStarted = true;
   isLoaded = true;
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
   const tabParam = urlParams.get("tab") || urlParams.get("cat");
   if (tabParam && certTabsList.some((t) => t.id === tabParam)) {
     currentSkillTab = tabParam;
@@ -2385,17 +2445,26 @@ if (urlParams.get("page") === "project") {
   triggerSkillTitleAnimation();
 } else if (urlParams.get("page") === "about") {
   if (loadingScreen) loadingScreen.style.display = "none";
+  if (openingScreen) openingScreen.style.display = "none";
   isStarted = true;
   isLoaded = true;
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
   openAboutPage();
   triggerAboutTitleAnimation();
 } else if (urlParams.get("page") === "contact") {
   if (loadingScreen) loadingScreen.style.display = "none";
+  if (openingScreen) openingScreen.style.display = "none";
   isStarted = true;
   isLoaded = true;
+  const launcher = document.getElementById("p3r-music-launcher");
+  if (launcher) launcher.classList.add("is-visible");
+  ensureBGM();
   openContactPage();
 } else if (urlParams.get("skip_loading") === "1") {
   if (loadingScreen) loadingScreen.style.display = "none";
+  if (openingScreen) openingScreen.style.display = "none";
   enterExperience();
   switchToLoopVideo();
 } else {
@@ -2935,7 +3004,6 @@ function setupP3RMusicPlayer() {
 
 // Initialize Music Player
 setupP3RMusicPlayer();
-ensureBGM();
 
 // ==========================================================================
 // 16. Persona 3 Reload - Mobile Portrait Blocker & Orientation Helper
