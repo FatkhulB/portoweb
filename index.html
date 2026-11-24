@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap"></noscript>
-  <link rel="stylesheet" href="css/style.css?v=97">
+  <link rel="stylesheet" href="css/style.css?v=98">
 </head>
 <body>
   <!-- Persona 3 Style Initial Loading Screen -->
@@ -30,7 +30,7 @@
   <section id="opening-screen" class="p3r-opening-screen" style="display: none;" aria-label="Persona 3 Reload Opening Screen">
     <div class="opening-video-wrap">
       <video id="opening-video" class="opening-video" playsinline webkit-playsinline preload="auto">
-        <source src="assets/opening.mp4" type="video/mp4">
+        <source src="assets/OpeningHD.mp4" type="video/mp4">
       </video>
       <div class="opening-vignette" aria-hidden="true"></div>
     </div>
@@ -40,10 +40,6 @@
       <button id="p3r-continue-btn" class="p3r-press-continue-btn" type="button" aria-label="Press to Continue">
         <span class="p3r-prompt-text">PRESS TO CONTINUE</span>
       </button>
-      <div id="p3r-opening-sound-pill" class="p3r-opening-sound-pill" style="display: none;" role="button" tabindex="0" aria-label="Unmute Opening Audio">
-        <span class="p3r-sound-icon">🔊</span>
-        <span class="p3r-sound-text">TAP TO UNMUTE AUDIO</span>
-      </div>
     </div>
   </section>
 
@@ -189,7 +185,8 @@
   </main>
 
   <!-- Preloaded Audio Elements -->
-  <audio id="bgm-lobby-el" src="assets/Music/Color Your Night.mp3" loop preload="auto" autoplay playsinline></audio>
+  <audio id="opening-music-el" src="assets/Music/OpeningMusic.mp3" loop preload="auto" playsinline></audio>
+  <audio id="bgm-lobby-el" src="assets/Music/Color Your Night.mp3" loop preload="auto" playsinline></audio>
   <audio id="sfx-navigation-el" src="sfx/ndt.mp3" preload="auto"></audio>
   <audio id="sfx-confirm-el" src="sfx/sellect.mp3" preload="auto"></audio>
   <audio id="sfx-close-menu-el" src="sfx/back.mp3" preload="auto"></audio>
@@ -815,6 +812,6 @@
     </div>
   </aside>
 
-  <script src="js/main.js?v=97" defer></script>
+  <script src="js/main.js?v=98" defer></script>
 </body>
 </html>

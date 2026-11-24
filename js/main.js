@@ -381,6 +381,7 @@ const loadingStatusText = document.getElementById("loading-status-text");
 const loadingStateText = document.getElementById("loading-state-text");
 const openingScreen = document.getElementById("opening-screen");
 const openingVideo = document.getElementById("opening-video");
+const openingMusicEl = document.getElementById("opening-music-el");
 const bgmLobbyEl = document.getElementById("bgm-lobby-el");
 const toggleBgmBtn = document.getElementById("toggle-bgm-btn");
 const toggleSfxBtn = document.getElementById("toggle-sfx-btn");
@@ -2014,51 +2015,42 @@ async function startLoadingSequence() {
     openingScreen.style.display = "flex";
     const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
     if (!isPortrait) {
-      playOpeningVideoWithAudio();
+      playOpeningMedia();
     }
   }
 }
 
-const openingSoundPill = document.getElementById("p3r-opening-sound-pill");
+function playOpeningMedia() {
+  // 1. Play Opening HD Video (muted for 100% reliable autoplay across all browsers & devices)
+  if (openingVideo) {
+    try { openingVideo.currentTime = 0; } catch (_) {}
+    openingVideo.muted = true;
+    openingVideo.play().catch(() => {});
+  }
 
-function updateOpeningAudioUI(isUnmuted) {
-  if (!openingSoundPill) return;
-  if (isUnmuted) {
-    openingSoundPill.style.display = "none";
-  } else {
-    openingSoundPill.style.display = "inline-flex";
+  // 2. Play Opening Scene Music (OpeningMusic.mp3)
+  if (openingMusicEl) {
+    openingMusicEl.loop = true;
+    openingMusicEl.muted = false;
+    openingMusicEl.volume = 0.8;
+    const p = openingMusicEl.play();
+    if (p !== undefined) {
+      p.catch((err) => {
+        console.warn("Opening music autoplay restricted, waiting for user touch:", err);
+      });
+    }
   }
 }
 
-function unmuteOpeningVideo() {
-  if (!openingVideo) return;
-  openingVideo.muted = false;
-  openingVideo.volume = 1.0;
-  updateOpeningAudioUI(true);
-  unlockAudioEngine();
-}
-
-function playOpeningVideoWithAudio() {
-  if (!openingVideo) return;
-  try {
-    openingVideo.currentTime = 0;
-  } catch (_) {}
-  openingVideo.muted = false;
-  openingVideo.volume = 1.0;
-  const playPromise = openingVideo.play();
-  if (playPromise !== undefined) {
-    playPromise.then(() => {
-      updateOpeningAudioUI(true);
-    }).catch((err) => {
-      console.warn("Unmuted autoplay restricted by browser policy; starting muted:", err);
-      openingVideo.muted = true;
-      const mutedPromise = openingVideo.play();
-      if (mutedPromise !== undefined) {
-        mutedPromise.then(() => {
-          updateOpeningAudioUI(false);
-        }).catch(() => {});
-      }
-    });
+function stopOpeningMedia() {
+  if (openingVideo) {
+    try { openingVideo.pause(); } catch (_) {}
+  }
+  if (openingMusicEl) {
+    try {
+      openingMusicEl.pause();
+      openingMusicEl.currentTime = 0;
+    } catch (_) {}
   }
 }
 
@@ -2074,11 +2066,8 @@ function triggerContinueToMenu(e) {
   unlockAudioEngine();
   playConfirmSFX();
 
-  if (openingVideo) {
-    try {
-      openingVideo.pause();
-    } catch (_) {}
-  }
+  // Stop opening video & music immediately on continue
+  stopOpeningMedia();
 
   if (openingScreen) {
     openingScreen.classList.add("dismissed");
@@ -2099,49 +2088,13 @@ function triggerContinueToMenu(e) {
   }, 220);
 }
 
-function handleOpeningScreenInteraction(e) {
-  if (isStarted) return;
-
-  const isContinueBtn = e.target && e.target.closest && e.target.closest("#p3r-continue-btn");
-  if (isContinueBtn) {
-    triggerContinueToMenu(e);
-    return;
-  }
-
-  const isSoundPill = e.target && e.target.closest && e.target.closest("#p3r-opening-sound-pill");
-  if (isSoundPill) {
-    if (e && e.cancelable) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    unmuteOpeningVideo();
-    return;
-  }
-
-  // If opening video is currently muted (mobile browser policy blocked unmuted autoplay),
-  // this touch unmutes the video with high quality audio and DOES NOT skip the opening animation!
-  if (openingVideo && openingVideo.muted) {
-    if (e && e.cancelable) e.preventDefault();
-    unmuteOpeningVideo();
-    return;
-  }
-
-  // Video is unmuted and audio is playing: touching anywhere proceeds into main menu
-  triggerContinueToMenu(e);
-}
-
+// Click anywhere on opening screen to continue
 if (openingScreen) {
-  openingScreen.addEventListener("click", handleOpeningScreenInteraction);
-}
-
-if (openingSoundPill) {
-  openingSoundPill.addEventListener("click", (e) => {
-    e.stopPropagation();
-    unmuteOpeningVideo();
+  openingScreen.addEventListener("click", (e) => {
+    if (!isStarted) {
+      triggerContinueToMenu(e);
+    }
   });
-  openingSoundPill.addEventListener("touchend", (e) => {
-    if (e.cancelable) e.preventDefault();
-    e.stopPropagation();
-    unmuteOpeningVideo();
-  }, { passive: false });
 }
 
 const continueBtn = document.getElementById("p3r-continue-btn");
@@ -2160,13 +2113,13 @@ if (openingVideo) {
   });
 }
 
-// Window-level un-muter on first user touch while opening screen is active
+// Window-level audio priming on first user touch while opening screen is active
 ["pointerdown", "touchstart", "click"].forEach((evt) => {
   window.addEventListener(evt, () => {
-    if (!isStarted && openingVideo && openingVideo.muted) {
-      openingVideo.muted = false;
-      openingVideo.volume = 1.0;
-      updateOpeningAudioUI(true);
+    if (!isStarted && openingMusicEl && openingMusicEl.paused) {
+      openingMusicEl.volume = 0.8;
+      openingMusicEl.muted = false;
+      openingMusicEl.play().catch(() => {});
     }
   }, { capture: true, passive: true });
 });
@@ -2196,9 +2149,7 @@ function enterExperience() {
   }
   if (openingScreen) {
     openingScreen.style.display = "none";
-    if (openingVideo) {
-      try { openingVideo.pause(); } catch (_) {}
-    }
+    stopOpeningMedia();
   }
 
   // Reveal floating music launcher button on main menu
@@ -2588,11 +2539,9 @@ function returnToOpeningScreen() {
     continueBtn.classList.remove("activating");
   }
 
-  if (openingVideo) {
-    const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
-    if (!isPortrait) {
-      playOpeningVideoWithAudio();
-    }
+  const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
+  if (!isPortrait) {
+    playOpeningMedia();
   }
 }
 
@@ -2600,7 +2549,7 @@ function ensureMainMenuActive() {
   forceCloseAllSubpages();
   if (openingScreen) {
     openingScreen.style.display = "none";
-    if (openingVideo) { try { openingVideo.pause(); } catch (_) {} }
+    stopOpeningMedia();
   }
   const launcher = document.getElementById("p3r-music-launcher");
   if (launcher) launcher.classList.add("is-visible");
@@ -2620,7 +2569,7 @@ function ensureMainMenuActive() {
 function ensureSubpageActive(pageName) {
   if (openingScreen) {
     openingScreen.style.display = "none";
-    if (openingVideo) { try { openingVideo.pause(); } catch (_) {} }
+    stopOpeningMedia();
   }
   isStarted = true;
   const launcher = document.getElementById("p3r-music-launcher");
@@ -3331,7 +3280,7 @@ function setupOrientationBlocker() {
     if (wasPortrait && !isPortrait) {
       const isOpeningVisible = openingScreen && openingScreen.style.display !== "none" && !openingScreen.classList.contains("dismissed");
       if (isOpeningVisible && !isStarted) {
-        playOpeningVideoWithAudio();
+        playOpeningMedia();
       }
     }
     wasPortrait = isPortrait;
@@ -3346,18 +3295,10 @@ function setupOrientationBlocker() {
   // Transparent audio priming on rotate overlay and loading screen without triggering continue
   const primeAudioOnOverlay = () => {
     unlockAudioEngine();
-    if (openingVideo) {
-      openingVideo.muted = false;
-      openingVideo.volume = 1.0;
-      const p = openingVideo.play();
-      if (p !== undefined) {
-        p.then(() => {
-          const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
-          if (isPortrait) {
-            try { openingVideo.pause(); } catch (_) {}
-          }
-        }).catch(() => {});
-      }
+    if (!isStarted && openingMusicEl && openingMusicEl.paused) {
+      openingMusicEl.volume = 0.8;
+      openingMusicEl.muted = false;
+      openingMusicEl.play().catch(() => {});
     }
   };
   ["pointerdown", "touchstart", "click"].forEach((evt) => {
