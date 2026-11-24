@@ -389,6 +389,7 @@ const toggleSfxBtn = document.getElementById("toggle-sfx-btn");
 // 3. Low-Latency Audio Engine (Matched to Folder 2 AudioProvider)
 // --------------------------------------------------------------------------
 let isBgmMuted = false;
+let isBgmPausedByUser = false;
 let isSfxMuted = false;
 let audioCtx = null;
 let sfxAudioBuffer = null;
@@ -429,7 +430,7 @@ function getAudioContext() {
 }
 
 function ensureBGM() {
-  if (!isStarted || !bgmLobbyEl || isBgmMuted) return;
+  if (!isStarted || !bgmLobbyEl || isBgmMuted || isBgmPausedByUser) return;
   bgmLobbyEl.loop = true;
   if (bgmLobbyEl.paused) {
     bgmLobbyEl.muted = false;
@@ -455,7 +456,7 @@ function ensureBGM() {
 }
 
 function unlockAndPlayAudio() {
-  if (!isStarted || !bgmLobbyEl || isBgmMuted) return;
+  if (!isStarted || !bgmLobbyEl || isBgmMuted || isBgmPausedByUser) return;
   if (bgmLobbyEl.muted) {
     bgmLobbyEl.muted = false;
     bgmLobbyEl.volume = 0.35;
@@ -503,6 +504,7 @@ function updateAudioToggleUI() {
 
 function toggleBGM() {
   isBgmMuted = !isBgmMuted;
+  isBgmPausedByUser = isBgmMuted;
   updateAudioToggleUI();
   if (bgmLobbyEl) {
     if (isBgmMuted) {
@@ -510,6 +512,9 @@ function toggleBGM() {
     } else {
       ensureBGM();
     }
+  }
+  if (window.p3rMusicPlayer && typeof window.p3rMusicPlayer.updateUI === "function") {
+    window.p3rMusicPlayer.updateUI();
   }
   if (!isSfxMuted) playConfirmSFX();
 }
@@ -592,7 +597,7 @@ function playAudioChannel({
   volume = 0.6,
   onPlaySuccess
 }) {
-  if (isStarted && !isBgmMuted) {
+  if (isStarted && !isBgmMuted && !isBgmPausedByUser) {
     ensureBGM();
   }
 
@@ -756,7 +761,7 @@ async function unlockAudioEngine() {
     } catch (_) {}
   }
 
-  if (isStarted && !isBgmMuted) {
+  if (isStarted && !isBgmMuted && !isBgmPausedByUser) {
     ensureBGM();
   }
 }
@@ -2014,6 +2019,25 @@ async function startLoadingSequence() {
   }
 }
 
+const openingSoundPill = document.getElementById("p3r-opening-sound-pill");
+
+function updateOpeningAudioUI(isUnmuted) {
+  if (!openingSoundPill) return;
+  if (isUnmuted) {
+    openingSoundPill.style.display = "none";
+  } else {
+    openingSoundPill.style.display = "inline-flex";
+  }
+}
+
+function unmuteOpeningVideo() {
+  if (!openingVideo) return;
+  openingVideo.muted = false;
+  openingVideo.volume = 1.0;
+  updateOpeningAudioUI(true);
+  unlockAudioEngine();
+}
+
 function playOpeningVideoWithAudio() {
   if (!openingVideo) return;
   try {
@@ -2023,10 +2047,17 @@ function playOpeningVideoWithAudio() {
   openingVideo.volume = 1.0;
   const playPromise = openingVideo.play();
   if (playPromise !== undefined) {
-    playPromise.catch((err) => {
+    playPromise.then(() => {
+      updateOpeningAudioUI(true);
+    }).catch((err) => {
       console.warn("Unmuted autoplay restricted by browser policy; starting muted:", err);
       openingVideo.muted = true;
-      openingVideo.play().catch(() => {});
+      const mutedPromise = openingVideo.play();
+      if (mutedPromise !== undefined) {
+        mutedPromise.then(() => {
+          updateOpeningAudioUI(false);
+        }).catch(() => {});
+      }
     });
   }
 }
@@ -2068,12 +2099,49 @@ function triggerContinueToMenu(e) {
   }, 220);
 }
 
+function handleOpeningScreenInteraction(e) {
+  if (isStarted) return;
+
+  const isContinueBtn = e.target && e.target.closest && e.target.closest("#p3r-continue-btn");
+  if (isContinueBtn) {
+    triggerContinueToMenu(e);
+    return;
+  }
+
+  const isSoundPill = e.target && e.target.closest && e.target.closest("#p3r-opening-sound-pill");
+  if (isSoundPill) {
+    if (e && e.cancelable) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    unmuteOpeningVideo();
+    return;
+  }
+
+  // If opening video is currently muted (mobile browser policy blocked unmuted autoplay),
+  // this touch unmutes the video with high quality audio and DOES NOT skip the opening animation!
+  if (openingVideo && openingVideo.muted) {
+    if (e && e.cancelable) e.preventDefault();
+    unmuteOpeningVideo();
+    return;
+  }
+
+  // Video is unmuted and audio is playing: touching anywhere proceeds into main menu
+  triggerContinueToMenu(e);
+}
+
 if (openingScreen) {
-  openingScreen.addEventListener("click", (e) => {
-    if (!isStarted) {
-      triggerContinueToMenu(e);
-    }
+  openingScreen.addEventListener("click", handleOpeningScreenInteraction);
+}
+
+if (openingSoundPill) {
+  openingSoundPill.addEventListener("click", (e) => {
+    e.stopPropagation();
+    unmuteOpeningVideo();
   });
+  openingSoundPill.addEventListener("touchend", (e) => {
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    unmuteOpeningVideo();
+  }, { passive: false });
 }
 
 const continueBtn = document.getElementById("p3r-continue-btn");
@@ -2091,6 +2159,17 @@ if (openingVideo) {
     }
   });
 }
+
+// Window-level un-muter on first user touch while opening screen is active
+["pointerdown", "touchstart", "click"].forEach((evt) => {
+  window.addEventListener(evt, () => {
+    if (!isStarted && openingVideo && openingVideo.muted) {
+      openingVideo.muted = false;
+      openingVideo.volume = 1.0;
+      updateOpeningAudioUI(true);
+    }
+  }, { capture: true, passive: true });
+});
 
 window.addEventListener("keydown", (e) => {
   if (!isStarted && isLoaded && openingScreen && openingScreen.style.display !== "none") {
@@ -2790,12 +2869,13 @@ function setupP3RMusicPlayer() {
     if (nextTitle) nextTitle.textContent = nextTrack.title;
     if (nextArtist) nextArtist.textContent = nextTrack.artist;
 
-    const isPlaying = bgmLobbyEl && !bgmLobbyEl.paused && !isBgmMuted;
+    const isPlaying = bgmLobbyEl && !bgmLobbyEl.paused && !isBgmMuted && !isBgmPausedByUser;
     if (playIcon) playIcon.textContent = isPlaying ? "❚❚" : "▶";
     if (launcher) launcher.classList.toggle("is-playing", isPlaying);
 
-    if (audioToggleText) audioToggleText.textContent = isBgmMuted ? "AUDIO OFF" : "AUDIO ON";
-    if (audioToggleBtn) audioToggleBtn.classList.toggle("is-muted", isBgmMuted);
+    const isAudioOff = isBgmMuted || isBgmPausedByUser;
+    if (audioToggleText) audioToggleText.textContent = isAudioOff ? "AUDIO OFF" : "AUDIO ON";
+    if (audioToggleBtn) audioToggleBtn.classList.toggle("is-muted", isAudioOff);
   }
 
   function playTrack(idx) {
@@ -2803,10 +2883,12 @@ function setupP3RMusicPlayer() {
     if (bgmLobbyEl) {
       bgmLobbyEl.src = p3rPlaylist[currentTrackIndex].src;
       bgmLobbyEl.currentTime = 0;
-      if (!isBgmMuted) {
-        bgmLobbyEl.play().catch(() => {});
-      }
+      isBgmPausedByUser = false;
+      isBgmMuted = false;
+      bgmLobbyEl.muted = false;
+      bgmLobbyEl.play().catch(() => {});
     }
+    updateAudioToggleUI();
     updatePlayerDeckUI();
     if (!isSfxMuted) playConfirmSFX();
   }
@@ -2819,16 +2901,26 @@ function setupP3RMusicPlayer() {
     playTrack((currentTrackIndex - 1 + p3rPlaylist.length) % p3rPlaylist.length);
   }
 
-  function togglePlayPause() {
+  function togglePlayPause(e) {
+    if (e) {
+      if (e.cancelable) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+    }
     if (!bgmLobbyEl) return;
-    if (bgmLobbyEl.paused || isBgmMuted) {
-      if (isBgmMuted) {
-        isBgmMuted = false;
-        updateAudioToggleUI();
-      }
-      bgmLobbyEl.play().catch(() => {});
+
+    // If currently playing (not muted and not paused by user): PAUSE IT!
+    if (!isBgmPausedByUser && !isBgmMuted && !bgmLobbyEl.paused) {
+      isBgmPausedByUser = true;
+      isBgmMuted = true;
+      try { bgmLobbyEl.pause(); } catch (_) {}
+      updateAudioToggleUI();
     } else {
-      bgmLobbyEl.pause();
+      // Currently paused or muted: RESUME / PLAY IT!
+      isBgmPausedByUser = false;
+      isBgmMuted = false;
+      bgmLobbyEl.muted = false;
+      updateAudioToggleUI();
+      bgmLobbyEl.play().catch(() => {});
     }
     updatePlayerDeckUI();
     if (!isSfxMuted) playConfirmSFX();
@@ -2964,7 +3056,7 @@ function setupP3RMusicPlayer() {
       const dy = e.clientY - startY;
       const dist = Math.hypot(dx, dy);
 
-      if (!isDragging && dist > 5) {
+      if (!isDragging && dist > 10) {
         isDragging = true;
         hasMoved = true;
         el.classList.add("is-dragging");
@@ -3047,39 +3139,56 @@ function setupP3RMusicPlayer() {
     }, { passive: true });
   }
 
+  // Touch & Click Event Binder with debounce & stopPropagation for mobile/iPad
+  function bindTouchAndClick(element, handler) {
+    if (!element) return;
+    let lastTime = 0;
+    const runner = (e) => {
+      if (e) {
+        if (e.cancelable) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+      }
+      const now = Date.now();
+      if (now - lastTime < 280) return;
+      lastTime = now;
+      handler(e);
+    };
+    element.addEventListener("touchend", runner, { passive: false });
+    element.addEventListener("click", runner);
+  }
+
   // Hook launcher & modal controls
   if (launcher) setupDraggableLauncher(launcher, toggleMusicModal);
-  if (closeBtn) closeBtn.addEventListener("click", closeMusicModal);
+  if (closeBtn) bindTouchAndClick(closeBtn, closeMusicModal);
   if (backdrop) backdrop.addEventListener("click", closeMusicModal);
   
   if (audioToggleBtn) {
-    audioToggleBtn.addEventListener("click", () => {
+    bindTouchAndClick(audioToggleBtn, () => {
       toggleBGM();
       updatePlayerDeckUI();
     });
   }
 
-  if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
+  if (playPauseBtn) bindTouchAndClick(playPauseBtn, togglePlayPause);
   
   const ctrlPrevBtn = document.getElementById("music-ctrl-prev-btn");
   const ctrlNextBtn = document.getElementById("music-ctrl-next-btn");
-  if (ctrlPrevBtn) ctrlPrevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevTrack(); });
-  if (ctrlNextBtn) ctrlNextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextTrack(); });
+  if (ctrlPrevBtn) bindTouchAndClick(ctrlPrevBtn, prevTrack);
+  if (ctrlNextBtn) bindTouchAndClick(ctrlNextBtn, nextTrack);
 
-  if (cardPrev) cardPrev.addEventListener("click", prevTrack);
-  if (cardNext) cardNext.addEventListener("click", nextTrack);
-  if (chevronPrev) chevronPrev.addEventListener("click", (e) => { e.stopPropagation(); prevTrack(); });
-  if (chevronNext) chevronNext.addEventListener("click", (e) => { e.stopPropagation(); nextTrack(); });
-  if (navPrevBtn) navPrevBtn.addEventListener("click", prevTrack);
-  if (navNextBtn) navNextBtn.addEventListener("click", nextTrack);
+  if (cardPrev) bindTouchAndClick(cardPrev, prevTrack);
+  if (cardNext) bindTouchAndClick(cardNext, nextTrack);
+  if (chevronPrev) bindTouchAndClick(chevronPrev, prevTrack);
+  if (chevronNext) bindTouchAndClick(chevronNext, nextTrack);
+  if (navPrevBtn) bindTouchAndClick(navPrevBtn, prevTrack);
+  if (navNextBtn) bindTouchAndClick(navNextBtn, nextTrack);
 
   // Skip -10s and +10s controls
   const replay10Btn = document.getElementById("music-replay-10s-btn");
   const forward10Btn = document.getElementById("music-forward-10s-btn");
 
   if (replay10Btn) {
-    replay10Btn.addEventListener("click", (e) => {
-      e.stopPropagation();
+    bindTouchAndClick(replay10Btn, () => {
       if (bgmLobbyEl) {
         bgmLobbyEl.currentTime = Math.max(0, bgmLobbyEl.currentTime - 10);
         updateTimelineUI();
@@ -3089,8 +3198,7 @@ function setupP3RMusicPlayer() {
   }
 
   if (forward10Btn) {
-    forward10Btn.addEventListener("click", (e) => {
-      e.stopPropagation();
+    bindTouchAndClick(forward10Btn, () => {
       if (bgmLobbyEl) {
         bgmLobbyEl.currentTime = Math.min(bgmLobbyEl.duration || 9999, bgmLobbyEl.currentTime + 10);
         updateTimelineUI();
@@ -3235,13 +3343,32 @@ function setupOrientationBlocker() {
     setTimeout(updateOrientationState, 150);
   }, { passive: true });
 
-  // Transparent audio priming on rotate overlay without triggering continue
+  // Transparent audio priming on rotate overlay and loading screen without triggering continue
   const primeAudioOnOverlay = () => {
     unlockAudioEngine();
+    if (openingVideo) {
+      openingVideo.muted = false;
+      openingVideo.volume = 1.0;
+      const p = openingVideo.play();
+      if (p !== undefined) {
+        p.then(() => {
+          const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
+          if (isPortrait) {
+            try { openingVideo.pause(); } catch (_) {}
+          }
+        }).catch(() => {});
+      }
+    }
   };
   ["pointerdown", "touchstart", "click"].forEach((evt) => {
     rotateOverlay.addEventListener(evt, primeAudioOnOverlay, { passive: true });
   });
+
+  if (loadingScreen) {
+    ["pointerdown", "touchstart", "click"].forEach((evt) => {
+      loadingScreen.addEventListener(evt, primeAudioOnOverlay, { passive: true });
+    });
+  }
 
   // Optional tap on overlay: try requesting fullscreen or landscape lock if supported
   rotateOverlay.addEventListener("click", () => {
