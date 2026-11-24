@@ -2007,30 +2007,27 @@ async function startLoadingSequence() {
   if (openingScreen) {
     openingScreen.classList.remove("dismissed");
     openingScreen.style.display = "flex";
-    if (openingVideo) {
-      openingVideo.currentTime = 0;
-      openingVideo.muted = false;
-      openingVideo.volume = 1.0;
-      const playP = openingVideo.play();
-      if (playP !== undefined) {
-        playP.catch((err) => {
-          console.warn("Unmuted autoplay restricted by browser policy; starting muted until user gesture:", err);
-          openingVideo.muted = true;
-          openingVideo.play().catch(() => {});
-
-          const autoUnmuteOnGesture = () => {
-            if (openingVideo) {
-              openingVideo.muted = false;
-              openingVideo.volume = 1.0;
-            }
-          };
-          window.addEventListener("pointerdown", autoUnmuteOnGesture, { once: true, capture: true });
-          window.addEventListener("touchstart", autoUnmuteOnGesture, { once: true, capture: true });
-          window.addEventListener("click", autoUnmuteOnGesture, { once: true, capture: true });
-          window.addEventListener("keydown", autoUnmuteOnGesture, { once: true, capture: true });
-        });
-      }
+    const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
+    if (!isPortrait) {
+      playOpeningVideoWithAudio();
     }
+  }
+}
+
+function playOpeningVideoWithAudio() {
+  if (!openingVideo) return;
+  try {
+    openingVideo.currentTime = 0;
+  } catch (_) {}
+  openingVideo.muted = false;
+  openingVideo.volume = 1.0;
+  const playPromise = openingVideo.play();
+  if (playPromise !== undefined) {
+    playPromise.catch((err) => {
+      console.warn("Unmuted autoplay restricted by browser policy; starting muted:", err);
+      openingVideo.muted = true;
+      openingVideo.play().catch(() => {});
+    });
   }
 }
 
@@ -2081,7 +2078,18 @@ if (openingScreen) {
 
 const continueBtn = document.getElementById("p3r-continue-btn");
 if (continueBtn) {
-  continueBtn.addEventListener("click", triggerContinueToMenu);
+  continueBtn.addEventListener("click", (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    triggerContinueToMenu(e);
+  });
+}
+
+if (openingVideo) {
+  openingVideo.addEventListener("ended", () => {
+    if (!isStarted) {
+      triggerContinueToMenu();
+    }
+  });
 }
 
 window.addEventListener("keydown", (e) => {
@@ -2502,16 +2510,9 @@ function returnToOpeningScreen() {
   }
 
   if (openingVideo) {
-    openingVideo.currentTime = 0;
-    openingVideo.muted = false;
-    openingVideo.volume = 1.0;
-    const playP = openingVideo.play();
-    if (playP !== undefined) {
-      playP.catch((err) => {
-        console.warn("Opening playback notice:", err);
-        openingVideo.muted = true;
-        openingVideo.play().catch(() => {});
-      });
+    const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
+    if (!isPortrait) {
+      playOpeningVideoWithAudio();
     }
   }
 }
@@ -3209,6 +3210,8 @@ function setupOrientationBlocker() {
   const rotateOverlay = document.getElementById("p3r-rotate-overlay");
   if (!rotateOverlay) return;
 
+  let wasPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
+
   function updateOrientationState() {
     const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 1024);
     if (isPortrait) {
@@ -3216,6 +3219,14 @@ function setupOrientationBlocker() {
     } else {
       document.body.classList.remove("portrait-locked");
     }
+
+    if (wasPortrait && !isPortrait) {
+      const isOpeningVisible = openingScreen && openingScreen.style.display !== "none" && !openingScreen.classList.contains("dismissed");
+      if (isOpeningVisible && !isStarted) {
+        playOpeningVideoWithAudio();
+      }
+    }
+    wasPortrait = isPortrait;
   }
 
   // Listen to orientation and resize events
@@ -3223,6 +3234,14 @@ function setupOrientationBlocker() {
   window.addEventListener("orientationchange", () => {
     setTimeout(updateOrientationState, 150);
   }, { passive: true });
+
+  // Transparent audio priming on rotate overlay without triggering continue
+  const primeAudioOnOverlay = () => {
+    unlockAudioEngine();
+  };
+  ["pointerdown", "touchstart", "click"].forEach((evt) => {
+    rotateOverlay.addEventListener(evt, primeAudioOnOverlay, { passive: true });
+  });
 
   // Optional tap on overlay: try requesting fullscreen or landscape lock if supported
   rotateOverlay.addEventListener("click", () => {
